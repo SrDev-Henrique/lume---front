@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useTransition } from "react";
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth";
-import { Avatar, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 
@@ -60,6 +60,9 @@ export function UserOnboardProfile() {
           <div className="flex items-center gap-2">
             <Avatar>
               <AvatarImage src={session?.user?.image ?? ""} />
+              <AvatarFallback>
+                {session?.user?.name?.charAt(0).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
               <p className="text-sm font-medium">{session?.user?.name}</p>
@@ -72,9 +75,9 @@ export function UserOnboardProfile() {
         <CardFooter>
           <div className="flex items-center justify-between w-full">
             <Button variant="secondary" asChild>
-              <Link href="/settings">
-                <Settings className="size-4" />
-                Configurações
+              <Link href="/sala-de-espera">
+                <MessageSquare className="size-4" />
+                waiting room
               </Link>
             </Button>
             <Button
