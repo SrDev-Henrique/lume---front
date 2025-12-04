@@ -50,8 +50,8 @@ export function UserOnboardProfile() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <Card>
+    <div className="flex items-center justify-center size-full">
+      <Card className="size-full">
         <CardHeader>
           <CardTitle>Bem-vindo</CardTitle>
           <Separator />
