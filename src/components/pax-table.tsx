@@ -6,7 +6,6 @@ import {
   type FilterFn,
   flexRender,
   getCoreRowModel,
-  getFacetedUniqueValues,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
@@ -14,8 +13,8 @@ import {
   type Row,
   type SortingState,
   useReactTable,
-  type VisibilityState,
 } from "@tanstack/react-table";
+import { differenceInMinutes } from "date-fns";
 import {
   ChevronDownIcon,
   ChevronFirstIcon,
@@ -25,14 +24,45 @@ import {
   ChevronUpIcon,
   CircleAlertIcon,
   CircleXIcon,
+  Clock12Icon,
   Columns3Icon,
   EllipsisIcon,
   FilterIcon,
   ListFilterIcon,
+  MailIcon,
+  MessageCircleIcon,
   PlusIcon,
   TrashIcon,
+  UserPlusIcon,
+  UserRoundX,
 } from "lucide-react";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import type { z, infer as ZodInfer } from "zod";
+import type { addPassengerSchema } from "@/app/(app)/sala-de-espera/page";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,10 +73,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+} from "./ui/alert-dialog";
+import { Checkbox } from "./ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -61,69 +89,71 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-} from "@/components/ui/pagination";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+} from "./ui/dropdown-menu";
+import { Label } from "./ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+} from "./ui/select";
+import { Badge } from "./ui/badge";
+import { UseFormReturn } from "react-hook-form";
+import { AddPassengerForm } from "@/app/(app)/sala-de-espera/components/add-passenger-form";
+import { Card, CardContent, CardTitle, CardHeader, CardDescription } from "./ui/card";
+import { Empty, EmptyDescription, EmptyMedia, EmptyHeader, EmptyTitle, EmptyContent } from "./ui/empty";
 
-type Item = {
-  id: string;
-  name: string;
-  email: string;
-  location: string;
-  flag: string;
-  status: "Active" | "Inactive" | "Pending";
-  balance: number;
-};
+type Passenger = ZodInfer<typeof addPassengerSchema>;
+
+// Returns the current time, refreshing itself according to the interval.
+function useNow(intervalMs = 60_000) {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+
+  return now;
+}
+
+function ChegadaCell({ createdAt }: { createdAt: Date | string }) {
+  const now = useNow();
+  const createdDate = new Date(createdAt);
+  const minutes = Math.max(0, differenceInMinutes(now, createdDate));
+
+  return (
+    <span className="text-sm text-muted-foreground">
+      {minutes === 0 ? (
+        "Chegou agora"
+      ) : (
+        <span className="flex items-center gap-1">
+          <Clock12Icon className="size-4" /> Esperando há {minutes} min
+        </span>
+      )}
+    </span>
+  );
+}
 
 // Custom filter function for multi-column searching
-const multiColumnFilterFn: FilterFn<Item> = (row, _columnId, filterValue) => {
+const multiColumnFilterFn: FilterFn<Passenger> = (
+  row,
+  _columnId,
+  filterValue,
+) => {
   const searchableRowContent =
     `${row.original.name} ${row.original.email}`.toLowerCase();
   const searchTerm = (filterValue ?? "").toLowerCase();
   return searchableRowContent.includes(searchTerm);
 };
 
-const statusFilterFn: FilterFn<Item> = (
-  row,
-  columnId,
-  filterValue: string[],
-) => {
-  if (!filterValue?.length) return true;
-  const status = row.getValue(columnId) as string;
-  return filterValue.includes(status);
-};
-
-const columns: ColumnDef<Item>[] = [
+const columns: ColumnDef<Passenger>[] = [
   {
     cell: ({ row }) => (
       <Checkbox
-        aria-label="Select row"
+        aria-label="Selecionar linha"
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
       />
@@ -132,7 +162,7 @@ const columns: ColumnDef<Item>[] = [
     enableSorting: false,
     header: ({ table }) => (
       <Checkbox
-        aria-label="Select all"
+        aria-label="Selecionar todas as linhas"
         checked={
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
@@ -145,171 +175,100 @@ const columns: ColumnDef<Item>[] = [
   },
   {
     accessorKey: "name",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("name")}</div>
-    ),
-    enableHiding: false,
+    header: "Nome",
     filterFn: multiColumnFilterFn,
-    header: "Name",
-    size: 180,
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-    size: 220,
-  },
-  {
-    accessorKey: "location",
     cell: ({ row }) => (
-      <div>
-        <span className="text-lg leading-none">{row.original.flag}</span>{" "}
-        {row.getValue("location")}
+      <div className="flex flex-col">
+        <span className="font-medium text-sm text-primary-foreground">
+          {row.original.name}
+        </span>
+        {row.original.email && (
+          <span className="text-xs text-muted-foreground">
+            {row.original.email}
+          </span>
+        )}
       </div>
     ),
-    header: "Location",
-    size: 180,
   },
   {
-    accessorKey: "status",
-    cell: ({ row }) => (
-      <Badge
-        className={cn(
-          row.getValue("status") === "Inactive" &&
-            "bg-muted-foreground/60 text-primary-foreground",
-        )}
-      >
-        {row.getValue("status")}
-      </Badge>
-    ),
-    filterFn: statusFilterFn,
-    header: "Status",
-    size: 100,
-  },
-  {
-    accessorKey: "performance",
-    header: "Performance",
-  },
-  {
-    accessorKey: "balance",
+    id: "guests",
+    header: "Acompanhantes",
     cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue("balance"));
-      const formatted = new Intl.NumberFormat("en-US", {
-        currency: "USD",
-        style: "currency",
-      }).format(amount);
-      return formatted;
+      const total = row.original.guests ?? 0;
+      return total > 0
+        ? `${total} acompanhante${total > 1 ? "s" : ""}`
+        : "Nenhum acompanhante";
     },
-    header: "Balance",
-    size: 120,
+  },
+  {
+    id: "arrivedAt",
+    header: "Chegada",
+    cell: ({ row }) => <ChegadaCell createdAt={row.original.createdAt} />,
+  },
+  {
+    id: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      return <Badge variant="outline" className="border-green-400/70"> <div className="size-1.5 bg-green-400/70 rounded-full me-1" /> {row.original.status}</Badge>;
+    },
+  },
+  {
+    id: "contact",
+    header: "Contato",
+    cell: ({ row }) => <ContactDialog passenger={row.original} />,
   },
   {
     cell: ({ row }) => <RowActions row={row} />,
     enableHiding: false,
-    header: () => <span className="sr-only">Actions</span>,
+    header: () => <span className="sr-only">Ações</span>,
     id: "actions",
     size: 60,
   },
 ];
 
-export default function PaxTable() {
+export default function PaxTable({ data, form, handleSubmit }: { data: Passenger[], form?: UseFormReturn<z.infer<typeof addPassengerSchema>>, handleSubmit?: (data: z.infer<typeof addPassengerSchema>) => void }) {
   const id = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "name", desc: false },
+  ]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const [sorting, setSorting] = useState<SortingState>([
-    {
-      desc: false,
-      id: "name",
-    },
-  ]);
-
-  const [data, setData] = useState<Item[]>([]);
-  useEffect(() => {
-    async function fetchPosts() {
-      const res = await fetch(
-        "https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/users-01_fertyx.json",
-      );
-      const data = await res.json();
-      setData(data);
-    }
-    fetchPosts();
-  }, []);
-
-  const handleDeleteRows = () => {
-    const selectedRows = table.getSelectedRowModel().rows;
-    const updatedData = data.filter(
-      (item) => !selectedRows.some((row) => row.original.id === item.id),
-    );
-    setData(updatedData);
-    table.resetRowSelection();
-  };
 
   const table = useReactTable({
     columns,
     data,
-    enableSortingRemoval: false,
     getCoreRowModel: getCoreRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
     state: {
       columnFilters,
-      columnVisibility,
       pagination,
       sorting,
     },
   });
 
-  // Get unique status values
-  const uniqueStatusValues = useMemo(() => {
-    const statusColumn = table.getColumn("status");
-
-    if (!statusColumn) return [];
-
-    const values = Array.from(statusColumn.getFacetedUniqueValues().keys());
-
-    return values.sort();
-  }, [table.getColumn]);
-
-  // Get counts for each status
-  const statusCounts = useMemo(() => {
-    const statusColumn = table.getColumn("status");
-    if (!statusColumn) return new Map();
-    return statusColumn.getFacetedUniqueValues();
-  }, [table]);
-
-  const selectedStatuses = useMemo(() => {
-    const filterValue = table.getColumn("status")?.getFilterValue() as string[];
-    return filterValue ?? [];
-  }, [table]);
-
-  const handleStatusChange = (checked: boolean, value: string) => {
-    const filterValue = table.getColumn("status")?.getFilterValue() as string[];
-    const newFilterValue = filterValue ? [...filterValue] : [];
-
-    if (checked) {
-      newFilterValue.push(value);
-    } else {
-      const index = newFilterValue.indexOf(value);
-      if (index > -1) {
-        newFilterValue.splice(index, 1);
-      }
-    }
-
-    table
-      .getColumn("status")
-      ?.setFilterValue(newFilterValue.length ? newFilterValue : undefined);
-  };
+  const fromItem =
+    table.getRowCount() === 0
+      ? 0
+      : table.getState().pagination.pageIndex *
+          table.getState().pagination.pageSize +
+        1;
+  const toItem =
+    table.getRowCount() === 0
+      ? 0
+      : Math.min(
+          (table.getState().pagination.pageIndex + 1) *
+            table.getState().pagination.pageSize,
+          table.getRowCount(),
+        );
 
   return (
     <div className="space-y-4">
@@ -319,7 +278,7 @@ export default function PaxTable() {
           {/* Filter by name or email */}
           <div className="relative">
             <Input
-              aria-label="Filter by name or email"
+              aria-label="Filtrar por nome ou email"
               className={cn(
                 "peer min-w-60 ps-9",
                 Boolean(table.getColumn("name")?.getFilterValue()) && "pe-9",
@@ -328,7 +287,7 @@ export default function PaxTable() {
               onChange={(e) =>
                 table.getColumn("name")?.setFilterValue(e.target.value)
               }
-              placeholder="Filter by name or email..."
+              placeholder="Filtrar por nome ou email..."
               ref={inputRef}
               type="text"
               value={
@@ -364,19 +323,22 @@ export default function PaxTable() {
                   size={16}
                 />
                 Status
-                {selectedStatuses.length > 0 && (
+                {/* {selectedStatuses.length > 0 && (
                   <span className="-me-1 inline-flex h-5 max-h-full items-center rounded border bg-background px-1 font-[inherit] font-medium text-[0.625rem] text-muted-foreground/70">
                     {selectedStatuses.length}
                   </span>
-                )}
+                )} */}
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="start" className="w-auto min-w-36 p-3">
+            <PopoverContent
+              align="start"
+              className="bg-card backdrop-blur-md w-auto min-w-36 p-3"
+            >
               <div className="space-y-3">
                 <div className="font-medium text-muted-foreground text-xs">
-                  Filters
+                  Filtros
                 </div>
-                <div className="space-y-3">
+                {/* <div className="space-y-3">
                   {uniqueStatusValues.map((value, i) => (
                     <div className="flex items-center gap-2" key={value}>
                       <Checkbox
@@ -397,7 +359,7 @@ export default function PaxTable() {
                       </Label>
                     </div>
                   ))}
-                </div>
+                </div> */}
               </div>
             </PopoverContent>
           </Popover>
@@ -410,11 +372,14 @@ export default function PaxTable() {
                   className="-ms-1 opacity-60"
                   size={16}
                 />
-                View
+                Visualizar
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+            <DropdownMenuContent
+              className="bg-card backdrop-blur-md"
+              align="end"
+            >
+              <DropdownMenuLabel>Alternar colunas</DropdownMenuLabel>
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
@@ -447,13 +412,13 @@ export default function PaxTable() {
                     className="-ms-1 opacity-60"
                     size={16}
                   />
-                  Delete
+                  Deletar
                   <span className="-me-1 inline-flex h-5 max-h-full items-center rounded border bg-background px-1 font-[inherit] font-medium text-[0.625rem] text-muted-foreground/70">
                     {table.getSelectedRowModel().rows.length}
                   </span>
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent className="bg-card backdrop-blur-md">
                 <div className="flex flex-col gap-2 max-sm:items-center sm:flex-row sm:gap-4">
                   <div
                     aria-hidden="true"
@@ -463,49 +428,43 @@ export default function PaxTable() {
                   </div>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      Are you absolutely sure?
+                      Tem certeza que deseja deletar?
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete{" "}
-                      {table.getSelectedRowModel().rows.length} selected{" "}
+                      Esta ação não pode ser desfeita. Esta ação irá deletar
+                      permanentemente {table.getSelectedRowModel().rows.length}{" "}
                       {table.getSelectedRowModel().rows.length === 1
-                        ? "row"
-                        : "rows"}
+                        ? "linha"
+                        : "linhas"}{" "}
+                      selecionada
+                      {table.getSelectedRowModel().rows.length === 1 ? "" : "s"}
                       .
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteRows}>
-                    Delete
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => {}}>
+                    Deletar
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           )}
           {/* Add user button */}
-          <Button className="ml-auto" variant="outline">
-            <PlusIcon
-              aria-hidden="true"
-              className="-ms-1 opacity-60"
-              size={16}
-            />
-            Add user
-          </Button>
+          <AddPaxDialog form={form!} handleSubmit={handleSubmit!} />
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-hidden rounded-md border bg-background">
-        <Table className="table-fixed">
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow className="hover:bg-transparent" key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      className="h-11"
+                      className="h-11 text-primary-foreground"
                       key={header.id}
                       style={{ width: `${header.getSize()}px` }}
                     >
@@ -581,10 +540,25 @@ export default function PaxTable() {
             ) : (
               <TableRow>
                 <TableCell
-                  className="h-24 text-center"
+                  className="h-fit text-center"
                   colSpan={columns.length}
                 >
-                  No results.
+                    <Empty>
+                        <EmptyHeader>
+                          <EmptyMedia variant="icon">
+                            <UserRoundX className="size-6" />
+                          </EmptyMedia>
+                          <EmptyTitle>Nenhum passageiro</EmptyTitle>
+                          <EmptyDescription>
+                            Nenhum passageiro encontrado. Adicione um passageiro para a lista de espera.
+                          </EmptyDescription>
+                        </EmptyHeader>
+                        <EmptyContent className="flex justify-center">
+                        <div>
+                          <AddPaxDialog form={form!} handleSubmit={handleSubmit!} />
+                        </div>
+                        </EmptyContent>
+                    </Empty>
                 </TableCell>
               </TableRow>
             )}
@@ -597,7 +571,7 @@ export default function PaxTable() {
         {/* Results per page */}
         <div className="flex items-center gap-3">
           <Label className="max-sm:sr-only" htmlFor={id}>
-            Rows per page
+            Linhas por página
           </Label>
           <Select
             onValueChange={(value) => {
@@ -606,7 +580,7 @@ export default function PaxTable() {
             value={table.getState().pagination.pageSize.toString()}
           >
             <SelectTrigger className="w-fit whitespace-nowrap" id={id}>
-              <SelectValue placeholder="Select number of results" />
+              <SelectValue placeholder="Selecione o número de resultados" />
             </SelectTrigger>
             <SelectContent className="[&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2 [&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8">
               {[5, 10, 25, 50].map((pageSize) => (
@@ -638,7 +612,7 @@ export default function PaxTable() {
                 table.getRowCount(),
               )}
             </span>{" "}
-            of{" "}
+            de{" "}
             <span className="text-foreground">
               {table.getRowCount().toString()}
             </span>
@@ -652,7 +626,7 @@ export default function PaxTable() {
               {/* First page button */}
               <PaginationItem>
                 <Button
-                  aria-label="Go to first page"
+                  aria-label="Ir para a primeira página"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   disabled={!table.getCanPreviousPage()}
                   onClick={() => table.firstPage()}
@@ -665,7 +639,7 @@ export default function PaxTable() {
               {/* Previous page button */}
               <PaginationItem>
                 <Button
-                  aria-label="Go to previous page"
+                  aria-label="Ir para a página anterior"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   disabled={!table.getCanPreviousPage()}
                   onClick={() => table.previousPage()}
@@ -678,7 +652,7 @@ export default function PaxTable() {
               {/* Next page button */}
               <PaginationItem>
                 <Button
-                  aria-label="Go to next page"
+                  aria-label="Ir para a próxima página"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   disabled={!table.getCanNextPage()}
                   onClick={() => table.nextPage()}
@@ -691,7 +665,7 @@ export default function PaxTable() {
               {/* Last page button */}
               <PaginationItem>
                 <Button
-                  aria-label="Go to last page"
+                  aria-label="Ir para a última página"
                   className="disabled:pointer-events-none disabled:opacity-50"
                   disabled={!table.getCanNextPage()}
                   onClick={() => table.lastPage()}
@@ -709,13 +683,48 @@ export default function PaxTable() {
   );
 }
 
-function RowActions({ row: _row }: { row: Row<Item> }) {
+function AddPaxDialog({ form, handleSubmit }: { form: UseFormReturn<z.infer<typeof addPassengerSchema>>, handleSubmit: (data: z.infer<typeof addPassengerSchema>) => void }) { 
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="ml-auto" variant="default">
+          <PlusIcon aria-hidden="true" className="-ms-1" size={16} />
+          Adicionar pax
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-card backdrop-blur-md p-0 w-max">
+        <DialogHeader className="hidden">
+          <DialogTitle className="sr-only">Adicionar passageiro</DialogTitle>
+          <DialogDescription className="sr-only">Adicione um passageiro para a lista de espera.</DialogDescription>
+        </DialogHeader>
+        {form && handleSubmit &&
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 justify-center text-lg font-medium">
+                <UserPlusIcon className="size-5" />
+                Adicionar passageiro
+              </CardTitle>
+              <CardDescription className="text-center">
+                Adicione um passageiro para a lista de espera.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AddPassengerForm form={form} handleSubmit={handleSubmit} />
+            </CardContent>
+          </Card>
+        }
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function RowActions({ row: _row }: { row: Row<Passenger> }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex justify-end">
           <Button
-            aria-label="Edit item"
+            aria-label="Editar item"
             className="shadow-none"
             size="icon"
             variant="ghost"
@@ -724,46 +733,106 @@ function RowActions({ row: _row }: { row: Row<Item> }) {
           </Button>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent className="bg-card backdrop-blur-md" align="end">
         <DropdownMenuGroup>
           <DropdownMenuItem>
-            <span>Edit</span>
+            <span>Editar</span>
             <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <span>Duplicate</span>
+            <span>Duplicar</span>
             <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
-            <span>Archive</span>
+            <span>Arquivar</span>
             <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger>More</DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger>Mais</DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem>Move to project</DropdownMenuItem>
-                <DropdownMenuItem>Move to folder</DropdownMenuItem>
+              <DropdownMenuSubContent className="bg-card backdrop-blur-md">
+                <DropdownMenuItem>Mover para projeto</DropdownMenuItem>
+                <DropdownMenuItem>Mover para pasta</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Advanced options</DropdownMenuItem>
+                <DropdownMenuItem>Opções avançadas</DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>Share</DropdownMenuItem>
-          <DropdownMenuItem>Add to favorites</DropdownMenuItem>
+          <DropdownMenuItem>Compartilhar</DropdownMenuItem>
+          <DropdownMenuItem>Adicionar aos favoritos</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-destructive focus:text-destructive">
-          <span>Delete</span>
+          <span>Deletar</span>
           <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+function ContactDialog({ passenger }: { passenger: Passenger }) {
+  const hasEmail = Boolean(passenger.email);
+  const hasPhone = typeof passenger.phone === "number";
+
+  const actions = [
+    hasEmail
+      ? {
+          label: `Enviar email (${passenger.email})`,
+          href: `mailto:${passenger.email}`,
+          Icon: MailIcon,
+        }
+      : null,
+    hasPhone
+      ? {
+          label: `WhatsApp (${passenger.phone})`,
+          href: `https://wa.me/${passenger.phone}`,
+          Icon: MessageCircleIcon,
+        }
+      : null,
+  ].filter(Boolean) as {
+    label: string;
+    href: string;
+    Icon: typeof MailIcon;
+  }[];
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          Chamar pax
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-card backdrop-blur-xs w-sm">
+        <DialogHeader>
+          <DialogTitle className="text-primary-foreground">Chamar {passenger.name}</DialogTitle>
+          <DialogDescription>
+            Escolha uma forma de contato disponível para o passageiro.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-2">
+          {actions.length ? (
+            actions.map(({ label, href, Icon }) => (
+              <Button key={label} asChild variant="secondary">
+                <a href={href} rel="noreferrer" target="_blank">
+                  <Icon className="mr-2 size-4" />
+                  {label}
+                </a>
+              </Button>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Nenhum canal de contato disponível.
+            </p>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

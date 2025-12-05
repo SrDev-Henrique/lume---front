@@ -56,23 +56,7 @@ export const addPassengerSchema = z
   });
 
 const initialPaxList: Passenger[] = [
-  {
-    id: crypto.randomUUID(),
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: 1234567890,
-    guests: 2,
-    status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 15),
-  },
-  {
-    id: crypto.randomUUID(),
-    name: "Jane Doe",
-    phone: 1234567890,
-    guests: 2,
-    status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 10),
-  },
+  
   {
     id: crypto.randomUUID(),
     name: "Jim Beam",
@@ -104,9 +88,14 @@ export default function WaitingRoom() {
       phone: undefined,
       guests: undefined,
       status: "Aguardando",
-      createdAt: new Date(),
+      createdAt: new Date(Date.now()),
     },
   });
+
+  const filteredData = paxList.filter((passenger) => {
+    const passengers = passenger.status === "Aguardando";
+    return passengers;
+  })
 
   function handleSubmit(data: Passenger) {
     setPaxList((prev) => [...prev, data]);
@@ -147,7 +136,7 @@ export default function WaitingRoom() {
             Lista de espera
           </h1>
         </div> */}
-        <PaxTable />
+        <PaxTable data={filteredData} form={form} handleSubmit={handleSubmit} />
       </div>
     </div>
   );
