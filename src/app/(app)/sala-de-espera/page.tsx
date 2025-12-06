@@ -57,7 +57,7 @@ const initialPaxList: Passenger[] = [
     name: "Jim Beam",
     email: "jim.beam@example.com",
     guests: 2,
-    status: "Aberto",
+    status: "Não compareceu",
     createdAt: new Date(Date.now() - 1000 * 60 * 20),
   },
   {
@@ -65,7 +65,7 @@ const initialPaxList: Passenger[] = [
     name: "John Doe",
     email: "john.doe@example.com",
     guests: 2,
-    status: "Aberto",
+    status: "Chamado",
     createdAt: new Date(Date.now() - 1000 * 60 * 20),
   },
   {
@@ -73,16 +73,16 @@ const initialPaxList: Passenger[] = [
     name: "Jane Doe",
     email: "jane.doe@example.com",
     guests: 2,
-    status: "Aberto",
+    status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 20),
   },
   {
     id: crypto.randomUUID(),
     name: "Jill Johnson",
     email: "jill.johnson@example.com",
-    phone: 1234567890,
+    phone: 19994012785,
     guests: 2,
-    status: "Aberto",
+    status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 30),
   },
 ];
@@ -159,7 +159,13 @@ export default function WaitingRoom() {
             Lista de espera
           </h1>
         </div> */}
-        <PaxTable data={filteredData} form={form} handleSubmit={handleSubmit} />
+        <PaxTable
+          data={filteredData}
+          form={form}
+          handleSubmit={handleSubmit}
+          paxList={paxList}
+          setPaxList={setPaxList}
+        />
       </div>
     </div>
   );

@@ -29,7 +29,6 @@ import {
   Clock12Icon,
   Columns3Icon,
   EllipsisIcon,
-  FilterIcon,
   ListFilterIcon,
   MailIcon,
   MessageCircleIcon,
@@ -40,9 +39,13 @@ import {
 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
+import { toast } from "sonner";
 import type { infer as ZodInfer, z } from "zod";
 import { AddPassengerForm } from "@/app/(app)/sala-de-espera/components/add-passenger-form";
+import { sendCallPaxEmail } from "@/app/(app)/sala-de-espera/lib/email/send-call-pax-email";
 import type { addPassengerSchema } from "@/app/(app)/sala-de-espera/page";
+import { handlePassengerUpdate } from "@/app/(app)/sala-de-espera/utils/handle-update-pax";
+import { sendPaxCall } from "@/app/(app)/sala-de-espera/utils/send-pax-call";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -68,6 +71,7 @@ import {
 } from "@/components/ui/table";
 import { formatPhone, getPhoneDigits } from "@/lib/phone";
 import { cn } from "@/lib/utils";
+import Toast from "./toaster";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -111,8 +115,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "./ui/empty";
+import { Kbd, KbdGroup } from "./ui/kbd";
 import { Label } from "./ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
   Select,
   SelectContent,
@@ -165,101 +169,18 @@ const multiColumnFilterFn: FilterFn<Passenger> = (
   return searchableRowContent.includes(searchTerm);
 };
 
-const columns: ColumnDef<Passenger>[] = [
-  {
-    cell: ({ row }) => (
-      <Checkbox
-        aria-label="Selecionar linha"
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-      />
-    ),
-    enableHiding: false,
-    enableSorting: false,
-    header: ({ table }) => (
-      <Checkbox
-        aria-label="Selecionar todas as linhas"
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-      />
-    ),
-    id: "select",
-    size: 28,
-  },
-  {
-    accessorKey: "name",
-    header: "Nome",
-    filterFn: multiColumnFilterFn,
-    cell: ({ row }) => (
-      <div className="flex flex-col">
-        <span className="font-medium text-sm text-primary-foreground">
-          {row.original.name}
-        </span>
-        {row.original.email && (
-          <span className="text-xs text-muted-foreground">
-            {row.original.email}
-          </span>
-        )}
-      </div>
-    ),
-  },
-  {
-    id: "guests",
-    header: "Acompanhantes",
-    cell: ({ row }) => {
-      const total = row.original.guests ?? 0;
-      return (
-        <Badge variant="secondary" className="text-shadow-color">
-          {total > 0
-            ? `${total} acompanhante${total > 1 ? "s" : ""}`
-            : "Nenhum acompanhante"}
-        </Badge>
-      );
-    },
-  },
-  {
-    id: "arrivedAt",
-    header: "Espera",
-    cell: ({ row }) => <ChegadaCell createdAt={row.original.createdAt} />,
-  },
-  {
-    id: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      return (
-        <Badge variant="outline" className="border-yellow-400/70">
-          {" "}
-          <div className="size-1.5 bg-yellow-400/70 rounded-full me-1" />{" "}
-          {row.original.status}
-        </Badge>
-      );
-    },
-  },
-  {
-    id: "contact",
-    header: "Contato",
-    cell: ({ row }) => <ContactDialog passenger={row.original} />,
-  },
-  {
-    cell: ({ row }) => <RowActions row={row} />,
-    enableHiding: false,
-    header: () => <span className="sr-only">Ações</span>,
-    id: "actions",
-    size: 60,
-  },
-];
-
 export default function PaxTable({
   data,
   form,
   handleSubmit,
+  paxList,
+  setPaxList,
 }: {
   data: Passenger[];
   form?: UseFormReturn<z.infer<typeof addPassengerSchema>>;
   handleSubmit?: (data: z.infer<typeof addPassengerSchema>) => void;
+  paxList: Passenger[];
+  setPaxList: (data: Passenger[]) => void;
 }) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -271,6 +192,99 @@ export default function PaxTable({
     pageIndex: 0,
     pageSize: 10,
   });
+
+  const columns: ColumnDef<Passenger>[] = [
+    {
+      cell: ({ row }) => (
+        <Checkbox
+          aria-label="Selecionar linha"
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+        />
+      ),
+      enableHiding: false,
+      enableSorting: false,
+      header: ({ table }) => (
+        <Checkbox
+          aria-label="Selecionar todas as linhas"
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        />
+      ),
+      id: "select",
+      size: 28,
+    },
+    {
+      accessorKey: "name",
+      header: "Nome",
+      filterFn: multiColumnFilterFn,
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-sm text-primary-foreground">
+            {row.original.name}
+          </span>
+          {row.original.email && (
+            <span className="text-xs text-muted-foreground">
+              {row.original.email}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: "guests",
+      header: "Acompanhantes",
+      cell: ({ row }) => {
+        const total = row.original.guests ?? 0;
+        return (
+          <Badge variant="secondary" className="text-shadow-color">
+            {total > 0
+              ? `${total} acompanhante${total > 1 ? "s" : ""}`
+              : "Nenhum acompanhante"}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: "arrivedAt",
+      header: "Espera",
+      cell: ({ row }) => <ChegadaCell createdAt={row.original.createdAt} />,
+    },
+    {
+      id: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        return (
+          <Badge variant="outline" className="border-yellow-400/70">
+            {" "}
+            <div className="size-1.5 bg-yellow-400/70 rounded-full me-1" />{" "}
+            {row.original.status}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: "contact",
+      header: "Contato",
+      cell: ({ row }) => (
+        <ContactDialog
+          passenger={row.original}
+          paxList={paxList}
+          setPaxList={setPaxList}
+        />
+      ),
+    },
+    {
+      cell: ({ row }) => <RowActions row={row} />,
+      enableHiding: false,
+      header: () => <span className="sr-only">Ações</span>,
+      id: "actions",
+      size: 60,
+    },
+  ];
 
   const table = useReactTable({
     columns,
@@ -733,40 +747,32 @@ function RowActions({ row: _row }: { row: Row<Passenger> }) {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <span>Editar</span>
-            <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
+            <DropdownMenuShortcut>
+              <KbdGroup>
+                <Kbd>ctrl</Kbd>
+                <Kbd>E</Kbd>
+              </KbdGroup>
+            </DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <span>Duplicar</span>
-            <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
+            <DropdownMenuShortcut>
+              <KbdGroup>
+                <Kbd>ctrl</Kbd>
+                <Kbd>D</Kbd>
+              </KbdGroup>
+            </DropdownMenuShortcut>
           </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <span>Arquivar</span>
-            <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>Mais</DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent className="bg-card backdrop-blur-md">
-                <DropdownMenuItem>Mover para projeto</DropdownMenuItem>
-                <DropdownMenuItem>Mover para pasta</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Opções avançadas</DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>Compartilhar</DropdownMenuItem>
-          <DropdownMenuItem>Adicionar aos favoritos</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-destructive focus:text-destructive">
           <span>Deletar</span>
-          <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
+          <DropdownMenuShortcut>
+            <KbdGroup>
+              <Kbd>ctrl</Kbd>
+              <Kbd>⌫</Kbd>
+            </KbdGroup>
+          </DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -776,17 +782,44 @@ function RowActions({ row: _row }: { row: Row<Passenger> }) {
 export function ContactDialog({
   passenger,
   message,
+  paxList,
+  setPaxList,
 }: {
   passenger: Passenger;
   message?: string;
+  paxList: Passenger[];
+  setPaxList: (data: Passenger[]) => void;
 }) {
   const hasEmail = Boolean(passenger.email);
   const phoneDigits = getPhoneDigits(passenger.phone);
   const hasPhone = phoneDigits.length >= 10;
 
+  const wave = "\u{1F44B}"; // 👋
+  const bell = "\u{1F514}"; // 🔔
+  const pin = "\u{1F4CD}"; // 📍
+  const warn = "\u26A0\uFE0F"; // ⚠️
+  const check = "\u2705"; // ✅
+  const thanks = "\u{1F64F}"; // 🙏
+
+  const namePart = passenger.name ? ` ${passenger.name}` : "";
+  const messagePart = `${wave} Olá${namePart}!
+
+${bell} *Chamada para Sala VIP*
+${pin} Por favor, dirija-se à recepção e informe seu nome em até *15 minutos* a partir deste chamado.
+
+${warn} Caso não se apresente em até 15 minutos, sua vaga será disponibilizada para outro passageiro.
+
+${check} Se puder comparecer, responda: *Confirmo*
+
+${thanks} Obrigado!
+- Ambaar Lounge`;
+
+  const encoded = encodeURIComponent(messagePart);
+
   const actions = [
     hasEmail
       ? {
+          type: "email",
           label: `Enviar email (${passenger.email})`,
           href: `mailto:${passenger.email}`,
           Icon: MailIcon,
@@ -794,8 +827,9 @@ export function ContactDialog({
       : null,
     hasPhone
       ? {
+          type: "phone",
           label: `WhatsApp (${formatPhone(phoneDigits)})`,
-          href: `https://wa.me/${phoneDigits}`,
+          href: `https://wa.me/${phoneDigits}?text=${encoded}`,
           Icon: MessageCircleIcon,
         }
       : null,
@@ -803,6 +837,7 @@ export function ContactDialog({
     label: string;
     href: string;
     Icon: typeof MailIcon;
+    type: "email" | "phone";
   }[];
 
   return (
@@ -823,12 +858,53 @@ export function ContactDialog({
         </DialogHeader>
         <div className="flex flex-col gap-2">
           {actions.length ? (
-            actions.map(({ label, href, Icon }) => (
-              <Button key={label} asChild variant="secondary">
-                <a href={href} rel="noreferrer" target="_blank">
-                  <Icon className="mr-2 size-4" />
-                  {label}
-                </a>
+            actions.map(({ label, href, Icon, type }) => (
+              <Button
+                key={label}
+                asChild
+                variant="secondary"
+                onClick={async () => {
+                  if (type === "email") {
+                    try {
+                      await sendPaxCall({
+                        passenger: {
+                          email: passenger.email!,
+                          name: passenger.name,
+                        },
+                      });
+                      toast.custom((t) => (
+                        <Toast
+                          onClick={() => toast.dismiss(t)}
+                          message="Chamada enviada com sucesso"
+                        />
+                      ));
+                      handlePassengerUpdate(
+                        {
+                          ...passenger,
+                          status: "Chamado",
+                        },
+                        paxList,
+                        setPaxList,
+                      );
+                    } catch (error) {
+                      console.error("Error sending pax call:", error);
+                      toast.error("Erro ao enviar chamada.");
+                    }
+                  }
+                }}
+                className="cursor-default"
+              >
+                {type === "phone" ? (
+                  <a href={href} rel="noreferrer" target="_blank">
+                    <Icon className="mr-2 size-4" />
+                    {label}
+                  </a>
+                ) : (
+                  <div>
+                    <Icon className="mr-2 size-4" />
+                    {label}
+                  </div>
+                )}
               </Button>
             ))
           ) : (

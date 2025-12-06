@@ -3,6 +3,7 @@
 import { RiUserReceivedFill } from "@remixicon/react";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyDescription,
@@ -49,21 +50,21 @@ export function CalledPax({ calledPaxList }: { calledPaxList: Passenger[] }) {
             >
               <div className="size-2 bg-green-500/70 rounded-full mt-1.5" />
               <div className="w-full grid grid-cols-2 gap-2">
-                <div className="w-full grid grid-rows-2 gap-2">
+                <div className="w-full flex flex-col justify-between gap-2 pb-2">
                   <span className="text-sm font-medium">{passenger.name}</span>
                   <p className="text-xs text-muted-foreground">
-                    Tempo de espera
+                    Aguardando: {secondsToMinutes(seconds)}
                   </p>
                 </div>
-                <div className="grid grid-rows-2 gap-2">
-                  <Badge variant="outline">
+                <div className="flex flex-col justify-between gap-2">
+                  <Badge variant="outline" className="h-fit self-end">
                     {passenger.guests && passenger.guests > 0
                       ? `${passenger.guests} acompanhante${passenger.guests > 1 ? "s" : ""}`
                       : "Nenhum acompanhante"}
                   </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    {secondsToMinutes(seconds)}
-                  </span>
+                  <Button size="sm" variant="outline">
+                    Pax entrou
+                  </Button>
                 </div>
               </div>
             </div>
