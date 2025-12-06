@@ -1,28 +1,24 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UserPlusIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 import PaxTable from "@/components/pax-table";
 import Toast from "@/components/toaster";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { AddPassengerForm } from "./components/add-passenger-form";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalledPax } from "./components/called-pax";
+import { NotArrivedPax } from "./components/not-arrived-pax";
 
-type Passenger = z.infer<typeof addPassengerSchema>;
+export type Passenger = z.infer<typeof addPassengerSchema>;
 
 const passengerStatusSchema = z.union([
   z.literal("Aguardando"),
   z.literal("Chamado"),
   z.literal("Não compareceu"),
+  z.literal("Aberto"),
 ]);
 
 // type PassengerStatus = z.infer<typeof passengerStatusSchema>;
@@ -56,13 +52,28 @@ export const addPassengerSchema = z
   });
 
 const initialPaxList: Passenger[] = [
-  
   {
     id: crypto.randomUUID(),
     name: "Jim Beam",
     email: "jim.beam@example.com",
     guests: 2,
-    status: "Chamado",
+    status: "Aberto",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "John Doe",
+    email: "john.doe@example.com",
+    guests: 2,
+    status: "Aberto",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "Jane Doe",
+    email: "jane.doe@example.com",
+    guests: 2,
+    status: "Aberto",
     createdAt: new Date(Date.now() - 1000 * 60 * 20),
   },
   {
@@ -71,7 +82,7 @@ const initialPaxList: Passenger[] = [
     email: "jill.johnson@example.com",
     phone: 1234567890,
     guests: 2,
-    status: "Não compareceu",
+    status: "Aberto",
     createdAt: new Date(Date.now() - 1000 * 60 * 30),
   },
 ];
@@ -95,7 +106,17 @@ export default function WaitingRoom() {
   const filteredData = paxList.filter((passenger) => {
     const passengers = passenger.status === "Aguardando";
     return passengers;
-  })
+  });
+
+  const calledPaxList = paxList.filter((passenger) => {
+    const passengers = passenger.status === "Chamado";
+    return passengers;
+  });
+
+  const notArrivedPaxList = paxList.filter((passenger) => {
+    const passengers = passenger.status === "Não compareceu";
+    return passengers;
+  });
 
   function handleSubmit(data: Passenger) {
     setPaxList((prev) => [...prev, data]);
@@ -114,19 +135,21 @@ export default function WaitingRoom() {
 
   return (
     <div className="absolute inset-0 px-4 flex items-start justify-center gap-4 overflow-y-auto scrollbar-hide pt-24 border">
-      <div className="sticky -top-[4.5rem] w-fit min-w-[275px] h-[500px] text-primary-foreground">
-        <Card>
+      <div className="sticky -top-[4.5rem] w-fit min-w-[275px] h-[500px] text-primary-foreground space-y-4">
+        <Card className="w-full max-w-md min-w-sm gap-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 justify-center text-lg font-medium">
-              <UserPlusIcon className="size-5" />
-              Adicionar passageiro
-            </CardTitle>
-            <CardDescription className="text-center">
-              Adicione um passageiro para a lista de espera.
-            </CardDescription>
+            <CardTitle>Passageiros chamados</CardTitle>
           </CardHeader>
           <CardContent>
-            <AddPassengerForm form={form} handleSubmit={handleSubmit} />
+            <CalledPax calledPaxList={calledPaxList} />
+          </CardContent>
+        </Card>
+        <Card className="w-full max-w-md min-w-sm gap-2">
+          <CardHeader>
+            <CardTitle>Passageiros que não compareceram</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <NotArrivedPax notArrivedPaxList={notArrivedPaxList} />
           </CardContent>
         </Card>
       </div>

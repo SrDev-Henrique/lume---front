@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatPhone, getPhoneDigits } from "@/lib/phone";
 import type { addPassengerSchema } from "../page";
 
 export function AddPassengerForm({
@@ -34,7 +35,7 @@ export function AddPassengerForm({
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -76,6 +77,7 @@ export function AddPassengerForm({
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input
+                      autoComplete="off"
                       type="email"
                       value={field.value ?? ""}
                       name={field.name}
@@ -107,15 +109,21 @@ export function AddPassengerForm({
                     <Input
                       inputMode="tel"
                       type="tel"
-                      pattern="[0-9]*"
-                      value={field.value === undefined ? "" : field.value}
+                      value={
+                        field.value === undefined
+                          ? ""
+                          : formatPhone(field.value)
+                      }
                       name={field.name}
                       onBlur={field.onBlur}
                       ref={field.ref}
                       onChange={(event) => {
-                        const value = event.target.value;
+                        const digits = getPhoneDigits(event.target.value).slice(
+                          0,
+                          11,
+                        );
                         field.onChange(
-                          value === "" ? undefined : Number(value),
+                          digits === "" ? undefined : Number(digits),
                         );
                       }}
                     />

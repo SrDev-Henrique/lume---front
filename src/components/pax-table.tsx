@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: <because> */
 "use client";
 
 import {
@@ -21,6 +22,7 @@ import {
   ChevronLastIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ChevronsUpDownIcon,
   ChevronUpIcon,
   CircleAlertIcon,
   CircleXIcon,
@@ -37,7 +39,9 @@ import {
   UserRoundX,
 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
-import type { z, infer as ZodInfer } from "zod";
+import type { UseFormReturn } from "react-hook-form";
+import type { infer as ZodInfer, z } from "zod";
+import { AddPassengerForm } from "@/app/(app)/sala-de-espera/components/add-passenger-form";
 import type { addPassengerSchema } from "@/app/(app)/sala-de-espera/page";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,6 +66,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatPhone, getPhoneDigits } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -74,6 +79,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
+import { Badge } from "./ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Checkbox } from "./ui/checkbox";
 import {
   DropdownMenu,
@@ -90,6 +103,14 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "./ui/empty";
 import { Label } from "./ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
@@ -99,20 +120,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Badge } from "./ui/badge";
-import { UseFormReturn } from "react-hook-form";
-import { AddPassengerForm } from "@/app/(app)/sala-de-espera/components/add-passenger-form";
-import { Card, CardContent, CardTitle, CardHeader, CardDescription } from "./ui/card";
-import { Empty, EmptyDescription, EmptyMedia, EmptyHeader, EmptyTitle, EmptyContent } from "./ui/empty";
 
 type Passenger = ZodInfer<typeof addPassengerSchema>;
 
 // Returns the current time, refreshing itself according to the interval.
 function useNow(intervalMs = 60_000) {
-  const [now, setNow] = useState(() => new Date());
+  const [now, setNow] = useState(() => new Date(Date.now()));
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), intervalMs);
+    const id = setInterval(() => setNow(new Date(Date.now())), intervalMs);
     return () => clearInterval(id);
   }, [intervalMs]);
 
@@ -195,21 +211,31 @@ const columns: ColumnDef<Passenger>[] = [
     header: "Acompanhantes",
     cell: ({ row }) => {
       const total = row.original.guests ?? 0;
-      return total > 0
-        ? `${total} acompanhante${total > 1 ? "s" : ""}`
-        : "Nenhum acompanhante";
+      return (
+        <Badge variant="secondary" className="text-shadow-color">
+          {total > 0
+            ? `${total} acompanhante${total > 1 ? "s" : ""}`
+            : "Nenhum acompanhante"}
+        </Badge>
+      );
     },
   },
   {
     id: "arrivedAt",
-    header: "Chegada",
+    header: "Espera",
     cell: ({ row }) => <ChegadaCell createdAt={row.original.createdAt} />,
   },
   {
     id: "status",
     header: "Status",
     cell: ({ row }) => {
-      return <Badge variant="outline" className="border-green-400/70"> <div className="size-1.5 bg-green-400/70 rounded-full me-1" /> {row.original.status}</Badge>;
+      return (
+        <Badge variant="outline" className="border-yellow-400/70">
+          {" "}
+          <div className="size-1.5 bg-yellow-400/70 rounded-full me-1" />{" "}
+          {row.original.status}
+        </Badge>
+      );
     },
   },
   {
@@ -226,7 +252,15 @@ const columns: ColumnDef<Passenger>[] = [
   },
 ];
 
-export default function PaxTable({ data, form, handleSubmit }: { data: Passenger[], form?: UseFormReturn<z.infer<typeof addPassengerSchema>>, handleSubmit?: (data: z.infer<typeof addPassengerSchema>) => void }) {
+export default function PaxTable({
+  data,
+  form,
+  handleSubmit,
+}: {
+  data: Passenger[];
+  form?: UseFormReturn<z.infer<typeof addPassengerSchema>>;
+  handleSubmit?: (data: z.infer<typeof addPassengerSchema>) => void;
+}) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -255,20 +289,20 @@ export default function PaxTable({ data, form, handleSubmit }: { data: Passenger
     },
   });
 
-  const fromItem =
-    table.getRowCount() === 0
-      ? 0
-      : table.getState().pagination.pageIndex *
-          table.getState().pagination.pageSize +
-        1;
-  const toItem =
-    table.getRowCount() === 0
-      ? 0
-      : Math.min(
-          (table.getState().pagination.pageIndex + 1) *
-            table.getState().pagination.pageSize,
-          table.getRowCount(),
-        );
+  // const fromItem =
+  //   table.getRowCount() === 0
+  //     ? 0
+  //     : table.getState().pagination.pageIndex *
+  //         table.getState().pagination.pageSize +
+  //       1;
+  // const toItem =
+  //   table.getRowCount() === 0
+  //     ? 0
+  //     : Math.min(
+  //         (table.getState().pagination.pageIndex + 1) *
+  //           table.getState().pagination.pageSize,
+  //         table.getRowCount(),
+  //       );
 
   return (
     <div className="space-y-4">
@@ -313,56 +347,6 @@ export default function PaxTable({ data, form, handleSubmit }: { data: Passenger
               </button>
             )}
           </div>
-          {/* Filter by status */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline">
-                <FilterIcon
-                  aria-hidden="true"
-                  className="-ms-1 opacity-60"
-                  size={16}
-                />
-                Status
-                {/* {selectedStatuses.length > 0 && (
-                  <span className="-me-1 inline-flex h-5 max-h-full items-center rounded border bg-background px-1 font-[inherit] font-medium text-[0.625rem] text-muted-foreground/70">
-                    {selectedStatuses.length}
-                  </span>
-                )} */}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              align="start"
-              className="bg-card backdrop-blur-md w-auto min-w-36 p-3"
-            >
-              <div className="space-y-3">
-                <div className="font-medium text-muted-foreground text-xs">
-                  Filtros
-                </div>
-                {/* <div className="space-y-3">
-                  {uniqueStatusValues.map((value, i) => (
-                    <div className="flex items-center gap-2" key={value}>
-                      <Checkbox
-                        checked={selectedStatuses.includes(value)}
-                        id={`${id}-${i}`}
-                        onCheckedChange={(checked: boolean) =>
-                          handleStatusChange(checked, value)
-                        }
-                      />
-                      <Label
-                        className="flex grow justify-between gap-2 font-normal"
-                        htmlFor={`${id}-${i}`}
-                      >
-                        {value}{" "}
-                        <span className="ms-2 text-muted-foreground text-xs">
-                          {statusCounts.get(value)}
-                        </span>
-                      </Label>
-                    </div>
-                  ))}
-                </div> */}
-              </div>
-            </PopoverContent>
-          </Popover>
           {/* Toggle columns visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -394,7 +378,7 @@ export default function PaxTable({ data, form, handleSubmit }: { data: Passenger
                       }
                       onSelect={(event) => event.preventDefault()}
                     >
-                      {column.id}
+                      {(column.columnDef.header as string) ?? column.id}
                     </DropdownMenuCheckboxItem>
                   );
                 })}
@@ -456,11 +440,14 @@ export default function PaxTable({ data, form, handleSubmit }: { data: Passenger
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-md border bg-background">
-        <Table>
+      <div className="overflow-hidden rounded-md border">
+        <Table className="bg-card backdrop-brightness-50">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow className="hover:bg-transparent" key={headerGroup.id}>
+              <TableRow
+                className="hover:bg-sidebar-accent/70"
+                key={headerGroup.id}
+              >
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
@@ -469,23 +456,13 @@ export default function PaxTable({ data, form, handleSubmit }: { data: Passenger
                       style={{ width: `${header.getSize()}px` }}
                     >
                       {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                        <div
+                        <button
+                          type="button"
                           className={cn(
-                            header.column.getCanSort() &&
-                              "flex h-full cursor-pointer select-none items-center justify-between gap-2",
+                            "flex h-full w-full items-center justify-between gap-2 text-left",
+                            "cursor-pointer select-none",
                           )}
                           onClick={header.column.getToggleSortingHandler()}
-                          onKeyDown={(e) => {
-                            // Enhanced keyboard handling for sorting
-                            if (
-                              header.column.getCanSort() &&
-                              (e.key === "Enter" || e.key === " ")
-                            ) {
-                              e.preventDefault();
-                              header.column.getToggleSortingHandler()?.(e);
-                            }
-                          }}
-                          tabIndex={header.column.getCanSort() ? 0 : undefined}
                         >
                           {flexRender(
                             header.column.columnDef.header,
@@ -506,8 +483,14 @@ export default function PaxTable({ data, form, handleSubmit }: { data: Passenger
                                 size={16}
                               />
                             ),
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
+                          }[header.column.getIsSorted() as string] ?? (
+                            <ChevronsUpDownIcon
+                              aria-hidden="true"
+                              className="shrink-0 opacity-60"
+                              size={16}
+                            />
+                          )}
+                        </button>
                       ) : (
                         flexRender(
                           header.column.columnDef.header,
@@ -526,6 +509,7 @@ export default function PaxTable({ data, form, handleSubmit }: { data: Passenger
                 <TableRow
                   data-state={row.getIsSelected() && "selected"}
                   key={row.id}
+                  className="hover:bg-sidebar-accent/70"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell className="last:py-0" key={cell.id}>
@@ -543,22 +527,26 @@ export default function PaxTable({ data, form, handleSubmit }: { data: Passenger
                   className="h-fit text-center"
                   colSpan={columns.length}
                 >
-                    <Empty>
-                        <EmptyHeader>
-                          <EmptyMedia variant="icon">
-                            <UserRoundX className="size-6" />
-                          </EmptyMedia>
-                          <EmptyTitle>Nenhum passageiro</EmptyTitle>
-                          <EmptyDescription>
-                            Nenhum passageiro encontrado. Adicione um passageiro para a lista de espera.
-                          </EmptyDescription>
-                        </EmptyHeader>
-                        <EmptyContent className="flex justify-center">
-                        <div>
-                          <AddPaxDialog form={form!} handleSubmit={handleSubmit!} />
-                        </div>
-                        </EmptyContent>
-                    </Empty>
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <UserRoundX className="size-6" />
+                      </EmptyMedia>
+                      <EmptyTitle>Nenhum passageiro</EmptyTitle>
+                      <EmptyDescription>
+                        Nenhum passageiro encontrado. Adicione um passageiro
+                        para a lista de espera.
+                      </EmptyDescription>
+                    </EmptyHeader>
+                    <EmptyContent className="flex justify-center">
+                      <div>
+                        <AddPaxDialog
+                          form={form!}
+                          handleSubmit={handleSubmit!}
+                        />
+                      </div>
+                    </EmptyContent>
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}
@@ -683,7 +671,13 @@ export default function PaxTable({ data, form, handleSubmit }: { data: Passenger
   );
 }
 
-function AddPaxDialog({ form, handleSubmit }: { form: UseFormReturn<z.infer<typeof addPassengerSchema>>, handleSubmit: (data: z.infer<typeof addPassengerSchema>) => void }) { 
+function AddPaxDialog({
+  form,
+  handleSubmit,
+}: {
+  form: UseFormReturn<z.infer<typeof addPassengerSchema>>;
+  handleSubmit: (data: z.infer<typeof addPassengerSchema>) => void;
+}) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -692,12 +686,14 @@ function AddPaxDialog({ form, handleSubmit }: { form: UseFormReturn<z.infer<type
           Adicionar pax
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-card backdrop-blur-md p-0 w-max">
+      <DialogContent className="bg-card/60 backdrop-blur-sm p-0 w-max">
         <DialogHeader className="hidden">
           <DialogTitle className="sr-only">Adicionar passageiro</DialogTitle>
-          <DialogDescription className="sr-only">Adicione um passageiro para a lista de espera.</DialogDescription>
+          <DialogDescription className="sr-only">
+            Adicione um passageiro para a lista de espera.
+          </DialogDescription>
         </DialogHeader>
-        {form && handleSubmit &&
+        {form && handleSubmit && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 justify-center text-lg font-medium">
@@ -712,10 +708,10 @@ function AddPaxDialog({ form, handleSubmit }: { form: UseFormReturn<z.infer<type
               <AddPassengerForm form={form} handleSubmit={handleSubmit} />
             </CardContent>
           </Card>
-        }
+        )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function RowActions({ row: _row }: { row: Row<Passenger> }) {
@@ -777,9 +773,16 @@ function RowActions({ row: _row }: { row: Row<Passenger> }) {
   );
 }
 
-function ContactDialog({ passenger }: { passenger: Passenger }) {
+export function ContactDialog({
+  passenger,
+  message,
+}: {
+  passenger: Passenger;
+  message?: string;
+}) {
   const hasEmail = Boolean(passenger.email);
-  const hasPhone = typeof passenger.phone === "number";
+  const phoneDigits = getPhoneDigits(passenger.phone);
+  const hasPhone = phoneDigits.length >= 10;
 
   const actions = [
     hasEmail
@@ -791,8 +794,8 @@ function ContactDialog({ passenger }: { passenger: Passenger }) {
       : null,
     hasPhone
       ? {
-          label: `WhatsApp (${passenger.phone})`,
-          href: `https://wa.me/${passenger.phone}`,
+          label: `WhatsApp (${formatPhone(phoneDigits)})`,
+          href: `https://wa.me/${phoneDigits}`,
           Icon: MessageCircleIcon,
         }
       : null,
@@ -806,12 +809,14 @@ function ContactDialog({ passenger }: { passenger: Passenger }) {
     <Dialog>
       <DialogTrigger asChild>
         <Button size="sm" variant="outline">
-          Chamar pax
+          {message ?? "Chamar pax"}
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-card backdrop-blur-xs w-sm">
         <DialogHeader>
-          <DialogTitle className="text-primary-foreground">Chamar {passenger.name}</DialogTitle>
+          <DialogTitle className="text-primary-foreground">
+            Chamar {passenger.name}
+          </DialogTitle>
           <DialogDescription>
             Escolha uma forma de contato disponível para o passageiro.
           </DialogDescription>
