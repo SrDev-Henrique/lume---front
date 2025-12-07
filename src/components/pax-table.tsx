@@ -190,7 +190,7 @@ export default function PaxTable({
   const inputRef = useRef<HTMLInputElement>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([
-    { id: "name", desc: false },
+    { id: "arrivedAt", desc: true },
   ]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -224,6 +224,8 @@ export default function PaxTable({
     {
       accessorKey: "name",
       header: "Nome",
+      enableHiding: false,
+      enableSorting: false,
       filterFn: multiColumnFilterFn,
       cell: ({ row }) => (
         <div className="flex flex-col">
@@ -239,13 +241,15 @@ export default function PaxTable({
     {
       id: "guests",
       header: "Acompanhantes",
+      enableSorting: false,
       cell: ({ row }) => {
         const total = row.original.guests ?? 0;
         return (
           <Badge variant="outline" className="text-primary-foreground">
             {total > 0 ? (
               <p>
-                <span className="text-primary">{total}</span> acompanhante{total > 1 ? "s" : ""}
+                <span className="text-primary">{total}</span> acompanhante
+                {total > 1 ? "s" : ""}
               </p>
             ) : (
               "Nenhum acompanhante"
@@ -257,11 +261,20 @@ export default function PaxTable({
     {
       id: "arrivedAt",
       header: "Espera",
+      accessorFn: (row) => new Date(row.createdAt).getTime(),
+      enableSorting: true,
+      sortingFn: (rowA, rowB) => {
+        return (
+          new Date(rowA.original.createdAt).getTime() -
+          new Date(rowB.original.createdAt).getTime()
+        );
+      },
       cell: ({ row }) => <ChegadaCell createdAt={row.original.createdAt} />,
     },
     {
       id: "status",
       header: "Status",
+      enableSorting: false,
       cell: ({ row }) => {
         return (
           <Badge variant="outline" className="border-yellow-400/70">
@@ -275,6 +288,7 @@ export default function PaxTable({
     {
       id: "contact",
       header: "Contato",
+      enableSorting: false,
       cell: ({ row }) => (
         <ContactDialog
           passenger={row.original}
@@ -286,6 +300,7 @@ export default function PaxTable({
     {
       cell: ({ row }) => <RowActions row={row} />,
       enableHiding: false,
+      enableSorting: false,
       header: () => <span className="sr-only">Ações</span>,
       id: "actions",
       size: 60,
@@ -299,6 +314,7 @@ export default function PaxTable({
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    enableSortingRemoval: false,
     onColumnFiltersChange: setColumnFilters,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
