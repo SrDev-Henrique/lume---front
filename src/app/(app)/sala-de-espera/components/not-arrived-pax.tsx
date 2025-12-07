@@ -39,10 +39,20 @@ export function NotArrivedPax({
                   </div>
 
                   <div className="flex justify-end">
-                    <Badge variant="outline" className="h-fit">
-                      {passenger.guests && passenger.guests > 0
-                        ? `${passenger.guests} acompanhante${passenger.guests > 1 ? "s" : ""}`
-                        : "Nenhum acompanhante"}
+                    <Badge
+                      variant="outline"
+                      className="text-primary-foreground h-fit"
+                    >
+                      {passenger.guests && passenger.guests > 0 ? (
+                        <p>
+                          <span className="text-primary">
+                            {passenger.guests}
+                          </span>{" "}
+                          acompanhante{passenger.guests > 1 ? "s" : ""}
+                        </p>
+                      ) : (
+                        "Nenhum acompanhante"
+                      )}
                     </Badge>
                   </div>
                 </div>

@@ -114,10 +114,15 @@ export function CalledPax({
                   </p>
                 </div>
                 <div className="flex flex-col justify-between gap-2">
-                  <Badge variant="outline" className="h-fit self-end">
-                    {passenger.guests && passenger.guests > 0
-                      ? `${passenger.guests} acompanhante${passenger.guests > 1 ? "s" : ""}`
-                      : "Nenhum acompanhante"}
+                  <Badge variant="outline" className="text-primary-foreground h-fit self-end">
+                    {passenger.guests && passenger.guests > 0 ? (
+                      <p>
+                        <span className="text-primary">{passenger.guests}</span>{" "}
+                        acompanhante{passenger.guests > 1 ? "s" : ""}
+                      </p>
+                    ) : (
+                      "Nenhum acompanhante"
+                    )}
                   </Badge>
                   <Button size="sm" variant="outline">
                     Pax entrou

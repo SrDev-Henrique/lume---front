@@ -230,11 +230,9 @@ export default function PaxTable({
           <span className="font-medium text-sm text-primary-foreground">
             {row.original.name}
           </span>
-          {row.original.email && (
-            <span className="text-xs text-muted-foreground">
-              {row.original.email}
-            </span>
-          )}
+          <span className="text-xs text-muted-foreground">
+            {row.original.email ?? formatPhone(row.original.phone)}
+          </span>
         </div>
       ),
     },
@@ -244,10 +242,14 @@ export default function PaxTable({
       cell: ({ row }) => {
         const total = row.original.guests ?? 0;
         return (
-          <Badge variant="secondary" className="text-shadow-color">
-            {total > 0
-              ? `${total} acompanhante${total > 1 ? "s" : ""}`
-              : "Nenhum acompanhante"}
+          <Badge variant="outline" className="text-primary-foreground">
+            {total > 0 ? (
+              <p>
+                <span className="text-primary">{total}</span> acompanhante{total > 1 ? "s" : ""}
+              </p>
+            ) : (
+              "Nenhum acompanhante"
+            )}
           </Badge>
         );
       },

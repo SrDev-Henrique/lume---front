@@ -86,20 +86,24 @@ const initialPaxList: Passenger[] = [
   },
 ];
 
+function createPassengerDefaults(): Passenger {
+  return {
+    id: crypto.randomUUID(),
+    name: "",
+    email: undefined,
+    phone: undefined,
+    guests: undefined,
+    status: "Aguardando",
+    createdAt: new Date(),
+  };
+}
+
 export default function WaitingRoom() {
   const [paxList, setPaxList] = useState<Passenger[]>(initialPaxList);
 
   const form = useForm<Passenger>({
     resolver: zodResolver(addPassengerSchema),
-    defaultValues: {
-      id: crypto.randomUUID(),
-      name: "",
-      email: undefined,
-      phone: undefined,
-      guests: undefined,
-      status: "Aguardando",
-      createdAt: new Date(Date.now()),
-    },
+    defaultValues: createPassengerDefaults(),
   });
 
   const filteredData = paxList.filter((passenger) => {
@@ -118,7 +122,13 @@ export default function WaitingRoom() {
   });
 
   function handleSubmit(data: Passenger) {
-    setPaxList((prev) => [...prev, { ...data, id: crypto.randomUUID() }]);
+    const passenger: Passenger = {
+      ...data,
+      id: crypto.randomUUID(),
+      createdAt: new Date(),
+    };
+
+    setPaxList((prev) => [...prev, passenger]);
     try {
       toast.custom((t) => (
         <Toast
@@ -126,7 +136,7 @@ export default function WaitingRoom() {
           onClick={() => toast.dismiss(t)}
         />
       ));
-      form.reset();
+      form.reset(createPassengerDefaults());
     } catch (error) {
       console.error(error);
     }
@@ -134,7 +144,7 @@ export default function WaitingRoom() {
 
   return (
     <div className="absolute inset-0 px-4 flex items-start justify-center gap-4 overflow-y-auto scrollbar-hide pt-24 border">
-      <div className="sticky -top-[4.5rem] w-fit min-w-[275px] h-[500px] text-primary-foreground space-y-4">
+      <div className="w-fit min-w-[275px] h-[500px] text-primary-foreground space-y-4 pb-4">
         <Card className="w-full max-w-md min-w-sm gap-2">
           <CardHeader>
             <CardTitle>Passageiros chamados</CardTitle>

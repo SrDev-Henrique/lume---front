@@ -38,7 +38,7 @@ export function UserOnboardProfile() {
 
   if (isPending) {
     return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 min-h-screen">
+      <div className="absolute inset-0 z-100 bg-background flex flex-col items-center justify-center gap-4 min-h-screen">
         <h1>Carregando sessão</h1>
         <Spinner />
       </div>
