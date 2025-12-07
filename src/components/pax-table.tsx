@@ -278,9 +278,9 @@ export default function PaxTable({
       enableSorting: false,
       cell: ({ row }) => {
         return (
-          <Badge variant="outline" className="border-yellow-400/70">
+          <Badge variant="outline" className="border-primary/70">
             {" "}
-            <div className="size-1.5 bg-yellow-400/70 rounded-full me-1" />{" "}
+            <div className="size-1.5 bg-primary/70 rounded-full me-1" />{" "}
             {row.original.status}
           </Badge>
         );
