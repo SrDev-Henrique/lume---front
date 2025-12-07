@@ -1,3 +1,5 @@
+"use client";
+
 import {
   BoltIcon,
   BookOpenIcon,
@@ -7,6 +9,7 @@ import {
   PinIcon,
   UserPenIcon,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -29,6 +32,17 @@ export function ProfileOptionsIcon({
   email: string;
   imgSrc?: string;
 }) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const fallbackInitial = useMemo(() => {
+    const source = (name || email || "").trim();
+    return source ? source.charAt(0).toUpperCase() : "";
+  }, [name, email]);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -37,10 +51,13 @@ export function ProfileOptionsIcon({
           variant="ghost"
         >
           <Avatar className="size-11">
-            {imgSrc && (
-              <AvatarImage alt={`image de perfil de${name}`} src={imgSrc} />
-            )}
-            <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarImage
+              alt={`image de perfil de${name}`}
+              src={imgSrc !== "" ? imgSrc : ""}
+            />
+            <AvatarFallback suppressHydrationWarning>
+              {isMounted ? fallbackInitial : null}
+            </AvatarFallback>
           </Avatar>
           <ChevronDownIcon
             aria-hidden="true"

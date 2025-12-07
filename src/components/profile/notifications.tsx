@@ -10,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 
@@ -144,7 +145,10 @@ export function Notifications() {
         <Separator className="my-2" />
         {notifications.map((notification) => (
           <div
-            className="rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+            className={cn(
+              "rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent",
+              notification.unread && "bg-primary/10 mb-1.5",
+            )}
             key={notification.id}
           >
             <div className="relative flex items-start gap-3 pe-3">

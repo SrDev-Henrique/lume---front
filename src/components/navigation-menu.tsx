@@ -16,8 +16,8 @@ export function NavigationMenu() {
             <div
               key={index}
               className={cn(
-                "w-fit py-3 px-4 rounded-3xl font-medium bg-secondary-foreground text-secondary hover:bg-ring hover:text-secondary transition-all duration-300 cursor-pointer",
-                index === 0 && "bg-primary text-muted",
+                "w-fit py-3 px-4 rounded-3xl font-medium bg-input/30 border border-input text-secondary hover:bg-input/50 hover:text-secondary transition-all duration-300 cursor-pointer",
+                index === 0 && "bg-primary/50 hover:bg-primary/50 border-primary/70",
               )}
             >
               <p>Menu</p>
