@@ -57,7 +57,7 @@ export function NotArrivedPax({
           ))}
         </div>
       ) : (
-        <Empty className="backdrop-brightness-50">
+        <Empty className="backdrop-brightness-50 w-full max-w-xs md:px-6 md:py-10">
           <EmptyHeader>
             <EmptyMedia>
               <RiUserUnfollowFill className="size-6" />

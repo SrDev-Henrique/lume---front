@@ -118,7 +118,7 @@ export default function WaitingRoom() {
   });
 
   function handleSubmit(data: Passenger) {
-    setPaxList((prev) => [...prev, data]);
+    setPaxList((prev) => [...prev, { ...data, id: crypto.randomUUID() }]);
     try {
       toast.custom((t) => (
         <Toast
@@ -148,7 +148,11 @@ export default function WaitingRoom() {
             <CardTitle>Passageiros que não compareceram</CardTitle>
           </CardHeader>
           <CardContent>
-            <NotArrivedPax notArrivedPaxList={notArrivedPaxList} paxList={paxList} setPaxList={setPaxList} />
+            <NotArrivedPax
+              notArrivedPaxList={notArrivedPaxList}
+              paxList={paxList}
+              setPaxList={setPaxList}
+            />
           </CardContent>
         </Card>
       </div>

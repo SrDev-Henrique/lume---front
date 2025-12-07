@@ -1,5 +1,3 @@
-import { toast } from "sonner";
-
 export async function sendPaxCall({
   passenger,
 }: {

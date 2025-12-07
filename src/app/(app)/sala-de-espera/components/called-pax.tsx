@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/empty";
 import type { Passenger } from "../page";
 
-const CALL_TIMEOUT_SECONDS = 1 * 10;
+const CALL_TIMEOUT_SECONDS = 15 * 60;
 
 export function CalledPax({
   calledPaxList,
