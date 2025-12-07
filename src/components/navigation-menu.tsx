@@ -1,9 +1,13 @@
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: <because> */
 "use client";
 
+import { authClient } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { Notifications } from "./profile/notifications";
+import { ProfileOptionsIcon } from "./profile/profile-options-icon";
 
 export function NavigationMenu() {
+  const { data: session } = authClient.useSession();
   return (
     <div className="fixed top-3.5 right-4 w-fit py-2 px-4 bg-card rounded-3xl backdrop-blur-sm border border-border/50 z-50">
       <div className="w-full flex items-center justify-end gap-20">
@@ -20,8 +24,13 @@ export function NavigationMenu() {
             </div>
           ))}
         </div>
-        <div className="w-fit py-3 px-4 bg-accent-foreground rounded-3xl font-medium text-accent hover:bg-primary hover:text-accent transition-all duration-300 cursor-pointer">
-          <p className="text-nowrap">Side Menu</p>
+        <div className="w-fit flex items-center gap-2">
+          <Notifications />
+          <ProfileOptionsIcon
+            name={session?.user?.name ?? ""}
+            email={session?.user?.email ?? ""}
+            imgSrc={session?.user?.image ?? undefined}
+          />
         </div>
       </div>
     </div>

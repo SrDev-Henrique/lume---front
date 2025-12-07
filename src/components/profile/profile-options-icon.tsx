@@ -27,26 +27,31 @@ export function ProfileOptionsIcon({
 }: {
   name: string;
   email: string;
-  imgSrc: string;
+  imgSrc?: string;
 }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="h-auto p-0 hover:bg-transparent" variant="ghost">
-          <Avatar>
-            <AvatarImage alt={`image de perfil de${name}`} src={imgSrc} />
+        <Button
+          className="h-auto p-0 hover:bg-transparent dark:hover:bg-transparent rounded-full focus-visible:border-transparent focus-visible:ring-transparent"
+          variant="ghost"
+        >
+          <Avatar className="size-11">
+            {imgSrc && (
+              <AvatarImage alt={`image de perfil de${name}`} src={imgSrc} />
+            )}
             <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
           <ChevronDownIcon
             aria-hidden="true"
-            className="opacity-60"
+            className="opacity-90"
             size={16}
           />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="max-w-64">
+      <DropdownMenuContent className="max-w-64 bg-card backdrop-blur-md border border-border/50">
         <DropdownMenuLabel className="flex min-w-0 flex-col">
-          <span className="truncate font-medium text-foreground text-sm">
+          <span className="truncate font-medium text-primary-foreground text-sm">
             {name}
           </span>
           <span className="truncate font-normal text-muted-foreground text-xs">
@@ -54,35 +59,39 @@ export function ProfileOptionsIcon({
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
+        <DropdownMenuGroup className="text-primary-foreground">
           <DropdownMenuItem>
-            <BoltIcon aria-hidden="true" className="opacity-60" size={16} />
+            <BoltIcon aria-hidden="true" className="opacity-90" size={16} />
             <span>Option 1</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Layers2Icon aria-hidden="true" className="opacity-60" size={16} />
+            <Layers2Icon aria-hidden="true" className="opacity-90" size={16} />
             <span>Option 2</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <BookOpenIcon aria-hidden="true" className="opacity-60" size={16} />
+            <BookOpenIcon aria-hidden="true" className="opacity-90" size={16} />
             <span>Option 3</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
-            <PinIcon aria-hidden="true" className="opacity-60" size={16} />
+            <PinIcon aria-hidden="true" className="opacity-90" size={16} />
             <span>Option 4</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <UserPenIcon aria-hidden="true" className="opacity-60" size={16} />
+            <UserPenIcon aria-hidden="true" className="opacity-90" size={16} />
             <span>Option 5</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <LogOutIcon aria-hidden="true" className="opacity-60" size={16} />
-          <span>Logout</span>
+        <DropdownMenuItem className="text-destructive hover:text-destructive/90 dark:hover:text-destructive/90">
+          <LogOutIcon
+            aria-hidden="true"
+            className="opacity-90 text-destructive"
+            size={16}
+          />
+          <span>Sair</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
