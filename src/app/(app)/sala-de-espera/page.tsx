@@ -1,13 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 import PaxTable from "@/components/pax-table";
 import Toast from "@/components/toaster";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalledPax } from "./components/called-pax";
 import { NotArrivedPax } from "./components/not-arrived-pax";
@@ -141,7 +140,7 @@ export default function WaitingRoom() {
             <CardTitle>Passageiros chamados</CardTitle>
           </CardHeader>
           <CardContent>
-            <CalledPax calledPaxList={calledPaxList} />
+            <CalledPax calledPaxList={calledPaxList} setPaxList={setPaxList} />
           </CardContent>
         </Card>
         <Card className="w-full max-w-md min-w-sm gap-2">
@@ -149,7 +148,7 @@ export default function WaitingRoom() {
             <CardTitle>Passageiros que não compareceram</CardTitle>
           </CardHeader>
           <CardContent>
-            <NotArrivedPax notArrivedPaxList={notArrivedPaxList} />
+            <NotArrivedPax notArrivedPaxList={notArrivedPaxList} paxList={paxList} setPaxList={setPaxList} />
           </CardContent>
         </Card>
       </div>

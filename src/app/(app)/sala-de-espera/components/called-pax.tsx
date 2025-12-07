@@ -1,6 +1,7 @@
 "use client";
 
 import { RiUserReceivedFill } from "@remixicon/react";
+import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,31 +14,84 @@ import {
 } from "@/components/ui/empty";
 import type { Passenger } from "../page";
 
-export function CalledPax({ calledPaxList }: { calledPaxList: Passenger[] }) {
-  const interval = useRef<NodeJS.Timeout>(undefined);
-  const [seconds, setSeconds] = useState(0);
+const CALL_TIMEOUT_SECONDS = 1 * 10;
+
+export function CalledPax({
+  calledPaxList,
+  setPaxList,
+}: {
+  calledPaxList: Passenger[];
+  setPaxList: Dispatch<SetStateAction<Passenger[]>>;
+}) {
+  const [timers, setTimers] = useState<Record<string, number>>({});
+  const timersRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
-    function startTimer(time = 900) {
-      setSeconds(time);
-
-      clearInterval(interval.current);
-      interval.current = setInterval(() => {
-        setSeconds((t) => {
-          if (t <= 1) {
-            clearInterval(interval.current);
-            return 0;
-          }
-          return t - 1;
-        });
-      }, 1000);
+    if (!calledPaxList.length) {
+      setTimers({});
+      timersRef.current = {};
+      return;
     }
-    startTimer();
-  }, []);
+
+    setTimers((prev) => {
+      const nextTimers: Record<string, number> = {};
+
+      calledPaxList.forEach((passenger) => {
+        nextTimers[passenger.id] = prev[passenger.id] ?? CALL_TIMEOUT_SECONDS;
+      });
+
+      timersRef.current = nextTimers;
+      return nextTimers;
+    });
+  }, [calledPaxList]);
+
+  useEffect(() => {
+    if (!calledPaxList.length) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      const currentTimers = timersRef.current;
+      if (!Object.keys(currentTimers).length) {
+        return;
+      }
+
+      const nextTimers: Record<string, number> = {};
+      const expiredIds: string[] = [];
+
+      Object.entries(currentTimers).forEach(([paxId, secondsLeft]) => {
+        if (secondsLeft <= 1) {
+          expiredIds.push(paxId);
+          return;
+        }
+
+        nextTimers[paxId] = secondsLeft - 1;
+      });
+
+      timersRef.current = nextTimers;
+      setTimers(nextTimers);
+
+      if (expiredIds.length) {
+        setPaxList((current) =>
+          current.map((passenger) =>
+            expiredIds.includes(passenger.id)
+              ? { ...passenger, status: "Não compareceu" }
+              : passenger,
+          ),
+        );
+      }
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [calledPaxList.length, setPaxList]);
 
   function secondsToMinutes(seconds: number) {
-    const minutes = Math.floor(seconds / 60);
-    return `${minutes}:${seconds % 60 < 10 ? `0${seconds % 60}` : seconds % 60} s`;
+    const safeSeconds = Math.max(0, seconds);
+    const minutes = Math.floor(safeSeconds / 60);
+    const remainingSeconds = safeSeconds % 60;
+    return `${minutes}:${
+      remainingSeconds < 10 ? `0${remainingSeconds}` : remainingSeconds
+    } s`;
   }
   return (
     <>
@@ -53,7 +107,10 @@ export function CalledPax({ calledPaxList }: { calledPaxList: Passenger[] }) {
                 <div className="w-full flex flex-col justify-between gap-2 pb-2">
                   <span className="text-sm font-medium">{passenger.name}</span>
                   <p className="text-xs text-muted-foreground">
-                    Aguardando: {secondsToMinutes(seconds)}
+                    Aguardando:{" "}
+                    {secondsToMinutes(
+                      timers[passenger.id] ?? CALL_TIMEOUT_SECONDS,
+                    )}
                   </p>
                 </div>
                 <div className="flex flex-col justify-between gap-2">
@@ -71,7 +128,7 @@ export function CalledPax({ calledPaxList }: { calledPaxList: Passenger[] }) {
           ))}
         </div>
       ) : (
-        <Empty className="backdrop-brightness-50">
+        <Empty className="backdrop-brightness-50 w-full max-w-xs md:px-6 md:py-10">
           <EmptyHeader>
             <EmptyMedia>
               <RiUserReceivedFill className="size-6" />

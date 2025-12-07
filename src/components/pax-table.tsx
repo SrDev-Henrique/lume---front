@@ -37,12 +37,19 @@ import {
   UserPlusIcon,
   UserRoundX,
 } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import type { infer as ZodInfer, z } from "zod";
 import { AddPassengerForm } from "@/app/(app)/sala-de-espera/components/add-passenger-form";
-import { sendCallPaxEmail } from "@/app/(app)/sala-de-espera/lib/email/send-call-pax-email";
 import type { addPassengerSchema } from "@/app/(app)/sala-de-espera/page";
 import { handlePassengerUpdate } from "@/app/(app)/sala-de-espera/utils/handle-update-pax";
 import { sendPaxCall } from "@/app/(app)/sala-de-espera/utils/send-pax-call";
@@ -99,12 +106,8 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import {
@@ -124,6 +127,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Spinner } from "./ui/spinner";
 
 type Passenger = ZodInfer<typeof addPassengerSchema>;
 
@@ -180,7 +184,7 @@ export default function PaxTable({
   form?: UseFormReturn<z.infer<typeof addPassengerSchema>>;
   handleSubmit?: (data: z.infer<typeof addPassengerSchema>) => void;
   paxList: Passenger[];
-  setPaxList: (data: Passenger[]) => void;
+  setPaxList: Dispatch<SetStateAction<Passenger[]>>;
 }) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -787,8 +791,8 @@ export function ContactDialog({
 }: {
   passenger: Passenger;
   message?: string;
-  paxList: Passenger[];
-  setPaxList: (data: Passenger[]) => void;
+  paxList?: Passenger[];
+  setPaxList?: Dispatch<SetStateAction<Passenger[]>>;
 }) {
   const hasEmail = Boolean(passenger.email);
   const phoneDigits = getPhoneDigits(passenger.phone);
@@ -815,6 +819,8 @@ ${thanks} Obrigado!
 - Ambaar Lounge`;
 
   const encoded = encodeURIComponent(messagePart);
+
+  const [isPending, startTransition] = useTransition();
 
   const actions = [
     hasEmail
@@ -866,11 +872,13 @@ ${thanks} Obrigado!
                 onClick={async () => {
                   if (type === "email") {
                     try {
-                      await sendPaxCall({
-                        passenger: {
-                          email: passenger.email!,
-                          name: passenger.name,
-                        },
+                      startTransition(async () => {
+                        await sendPaxCall({
+                          passenger: {
+                            email: passenger.email!,
+                            name: passenger.name,
+                          },
+                        });
                       });
                       toast.custom((t) => (
                         <Toast
@@ -878,13 +886,16 @@ ${thanks} Obrigado!
                           message="Chamada enviada com sucesso"
                         />
                       ));
-                      handlePassengerUpdate(
+                      await handlePassengerUpdate(
                         {
                           ...passenger,
                           status: "Chamado",
                         },
-                        paxList,
-                        setPaxList,
+                        paxList ?? [],
+                        setPaxList ??
+                          (() => {
+                            return [];
+                          }),
                       );
                     } catch (error) {
                       console.error("Error sending pax call:", error);
@@ -893,6 +904,7 @@ ${thanks} Obrigado!
                   }
                 }}
                 className="cursor-default"
+                disabled={isPending}
               >
                 {type === "phone" ? (
                   <a href={href} rel="noreferrer" target="_blank">
@@ -902,7 +914,7 @@ ${thanks} Obrigado!
                 ) : (
                   <div>
                     <Icon className="mr-2 size-4" />
-                    {label}
+                    {isPending ? <Spinner /> : label}
                   </div>
                 )}
               </Button>

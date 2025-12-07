@@ -1,9 +1,10 @@
+import type { Dispatch, SetStateAction } from "react";
 import type { Passenger } from "../page";
 
 export function handlePassengerUpdate(
   updatedPassenger: Passenger,
   paxList: Passenger[],
-  setPaxList: (data: Passenger[]) => void,
+  setPaxList: Dispatch<SetStateAction<Passenger[]>>,
 ) {
   setPaxList(
     paxList.map((passenger) =>

@@ -1,4 +1,5 @@
 import { RiUserUnfollowFill } from "@remixicon/react";
+import type { Dispatch, SetStateAction } from "react";
 import { ContactDialog } from "@/components/pax-table";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,8 +13,12 @@ import type { Passenger } from "../page";
 
 export function NotArrivedPax({
   notArrivedPaxList,
+  paxList,
+  setPaxList,
 }: {
   notArrivedPaxList: Passenger[];
+  paxList?: Passenger[];
+  setPaxList?: Dispatch<SetStateAction<Passenger[]>>;
 }) {
   return (
     <>
@@ -44,6 +49,8 @@ export function NotArrivedPax({
                 <ContactDialog
                   passenger={passenger}
                   message="Chamar novamente"
+                  paxList={paxList}
+                  setPaxList={setPaxList}
                 />
               </div>
             </div>
