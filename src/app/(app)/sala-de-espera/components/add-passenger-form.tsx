@@ -35,7 +35,11 @@ export function AddPassengerForm({
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input autoComplete="off" {...field} />
+                    <Input
+                      autoComplete="off"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

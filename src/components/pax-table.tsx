@@ -50,6 +50,7 @@ import type { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import type { infer as ZodInfer, z } from "zod";
 import { AddPassengerForm } from "@/app/(app)/sala-de-espera/components/add-passenger-form";
+import { EditPaxDialog } from "@/app/(app)/sala-de-espera/components/edit-pax-dialog";
 import type { addPassengerSchema } from "@/app/(app)/sala-de-espera/page";
 import { handlePassengerUpdate } from "@/app/(app)/sala-de-espera/utils/handle-update-pax";
 import { sendPaxCall } from "@/app/(app)/sala-de-espera/utils/send-pax-call";
@@ -298,7 +299,9 @@ export default function PaxTable({
       ),
     },
     {
-      cell: ({ row }) => <RowActions row={row} />,
+      cell: ({ row }) => (
+        <RowActions row={row} paxList={paxList} setPaxList={setPaxList} />
+      ),
       enableHiding: false,
       enableSorting: false,
       header: () => <span className="sr-only">Ações</span>,
@@ -722,7 +725,7 @@ function AddPaxDialog({
           Adicionar pax
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-card/60 backdrop-blur-sm p-0 w-max">
+      <DialogContent className="bg-transparent p-0 w-max">
         <DialogHeader className="hidden">
           <DialogTitle className="sr-only">Adicionar passageiro</DialogTitle>
           <DialogDescription className="sr-only">
@@ -730,7 +733,7 @@ function AddPaxDialog({
           </DialogDescription>
         </DialogHeader>
         {form && handleSubmit && (
-          <Card>
+          <Card className="bg-card/60 backdrop-blur-sm ">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 justify-center text-lg font-medium">
                 <UserPlusIcon className="size-5" />
@@ -750,54 +753,86 @@ function AddPaxDialog({
   );
 }
 
-function RowActions({ row: _row }: { row: Row<Passenger> }) {
+function RowActions({
+  row: _row,
+  paxList,
+  setPaxList,
+}: {
+  row: Row<Passenger>;
+  paxList: Passenger[];
+  setPaxList: Dispatch<SetStateAction<Passenger[]>>;
+}) {
+  const [editingPax, setEditingPax] = useState<Passenger | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <div className="flex justify-end">
-          <Button
-            aria-label="Editar item"
-            className="shadow-none"
-            size="icon"
-            variant="ghost"
-          >
-            <EllipsisIcon aria-hidden="true" size={16} />
-          </Button>
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card backdrop-blur-md" align="end">
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <span>Editar</span>
+    <div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <div className="flex justify-end">
+            <Button
+              aria-label="Editar item"
+              className="shadow-none"
+              size="icon"
+              variant="ghost"
+            >
+              <EllipsisIcon aria-hidden="true" size={16} />
+            </Button>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="bg-card backdrop-blur-md" align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              onClick={() => {
+                setEditingPax(_row.original);
+                setIsEditing(true);
+              }}
+            >
+              <Button
+                size="sm"
+                variant="ghost"
+                className="hover:bg-transparent dark:hover:bg-transparent p-0"
+              >
+                Editar
+              </Button>
+              <DropdownMenuShortcut>
+                <KbdGroup>
+                  <Kbd>ctrl</Kbd>
+                  <Kbd>E</Kbd>
+                </KbdGroup>
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <span>Duplicar</span>
+              <DropdownMenuShortcut>
+                <KbdGroup>
+                  <Kbd>ctrl</Kbd>
+                  <Kbd>D</Kbd>
+                </KbdGroup>
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <span>Deletar</span>
             <DropdownMenuShortcut>
               <KbdGroup>
                 <Kbd>ctrl</Kbd>
-                <Kbd>E</Kbd>
+                <Kbd>⌫</Kbd>
               </KbdGroup>
             </DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <span>Duplicar</span>
-            <DropdownMenuShortcut>
-              <KbdGroup>
-                <Kbd>ctrl</Kbd>
-                <Kbd>D</Kbd>
-              </KbdGroup>
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive focus:text-destructive">
-          <span>Deletar</span>
-          <DropdownMenuShortcut>
-            <KbdGroup>
-              <Kbd>ctrl</Kbd>
-              <Kbd>⌫</Kbd>
-            </KbdGroup>
-          </DropdownMenuShortcut>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {editingPax && (
+        <EditPaxDialog
+          editingPax={editingPax}
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+          paxList={paxList}
+          setPaxList={setPaxList}
+        />
+      )}
+    </div>
   );
 }
 
