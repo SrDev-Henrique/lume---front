@@ -104,7 +104,7 @@ export function CalledPax({
             >
               <div className="size-2 bg-green-500/70 rounded-full mt-1.5" />
               <div className="w-full grid grid-cols-2 gap-2">
-                <div className="w-full flex flex-col justify-between gap-2 pb-2">
+                <div className="w-full flex flex-col justify-between gap-2.5 pb-2">
                   <span className="text-sm font-medium">{passenger.name}</span>
                   <p className="text-xs text-muted-foreground">
                     Aguardando:{" "}
@@ -113,7 +113,7 @@ export function CalledPax({
                     )}
                   </p>
                 </div>
-                <div className="flex flex-col justify-between gap-2">
+                <div className="flex flex-col justify-between gap-2.5">
                   <Badge variant="outline" className="text-primary-foreground h-fit self-end">
                     {passenger.guests && passenger.guests > 0 ? (
                       <p>
@@ -133,7 +133,7 @@ export function CalledPax({
           ))}
         </div>
       ) : (
-        <Empty className="backdrop-brightness-50 w-full max-w-xs md:px-6 md:py-10">
+        <Empty className="backdrop-brightness-50 w-full max-w-[335.100px] md:px-8 md:py-10">
           <EmptyHeader>
             <EmptyMedia>
               <RiUserReceivedFill className="size-6" />

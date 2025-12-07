@@ -30,9 +30,9 @@ export function NotArrivedPax({
               className="flex items-start gap-2 border border-border/50 backdrop-brightness-50 rounded-lg p-2"
             >
               <div className="size-2 bg-red-500/70 rounded-full mt-1.5" />
-              <div className="w-full flex flex-col">
+              <div className="w-full flex flex-col gap-2.5">
                 <div className="w-full grid grid-cols-2 gap-2">
-                  <div className="w-full grid grid-rows-2 gap-2">
+                  <div className="w-full flex items-start">
                     <span className="text-sm font-medium">
                       {passenger.name}
                     </span>
@@ -67,7 +67,7 @@ export function NotArrivedPax({
           ))}
         </div>
       ) : (
-        <Empty className="backdrop-brightness-50 w-full max-w-xs md:px-6 md:py-10">
+        <Empty className="backdrop-brightness-50 w-full max-w-[335.100px] md:px-8 md:py-10">
           <EmptyHeader>
             <EmptyMedia>
               <RiUserUnfollowFill className="size-6" />
