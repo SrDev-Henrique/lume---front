@@ -1,5 +1,6 @@
 "use client";
 
+import { faker } from "@faker-js/faker";
 import { BellIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -18,7 +19,7 @@ const initialNotifications = [
   {
     action: "requested review on",
     id: 1,
-    image: "/origin/avatar-80-01.jpg",
+    image: faker.image.personPortrait(),
     target: "PR #42: Feature implementation",
     timestamp: "15 minutes ago",
     unread: true,
@@ -27,7 +28,7 @@ const initialNotifications = [
   {
     action: "shared",
     id: 2,
-    image: "/origin/avatar-80-02.jpg",
+    image: faker.image.personPortrait(),
     target: "New component library",
     timestamp: "45 minutes ago",
     unread: true,
@@ -36,7 +37,7 @@ const initialNotifications = [
   {
     action: "assigned you to",
     id: 3,
-    image: "/origin/avatar-80-03.jpg",
+    image: faker.image.personPortrait(),
     target: "API integration task",
     timestamp: "4 hours ago",
     unread: false,
@@ -45,7 +46,7 @@ const initialNotifications = [
   {
     action: "replied to your comment in",
     id: 4,
-    image: "/origin/avatar-80-04.jpg",
+    image: faker.image.personPortrait(),
     target: "Authentication flow",
     timestamp: "12 hours ago",
     unread: false,
@@ -54,7 +55,7 @@ const initialNotifications = [
   {
     action: "commented on",
     id: 5,
-    image: "/origin/avatar-80-05.jpg",
+    image: faker.image.personPortrait(),
     target: "Dashboard redesign",
     timestamp: "2 days ago",
     unread: false,
@@ -63,7 +64,7 @@ const initialNotifications = [
   {
     action: "mentioned you in",
     id: 6,
-    image: "/origin/avatar-80-06.jpg",
+    image: faker.image.personPortrait(),
     target: "coss.com open graph image",
     timestamp: "2 weeks ago",
     unread: false,

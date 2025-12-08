@@ -9,8 +9,8 @@ import {
   PinIcon,
   UserPenIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { authClient } from "@/lib/auth";
+import { Spinner } from "../ui/spinner";
 
 export function ProfileOptionsIcon({
   name,
@@ -33,6 +35,9 @@ export function ProfileOptionsIcon({
   imgSrc?: string;
 }) {
   const [isMounted, setIsMounted] = useState(false);
+  const [isSigningOut, startTransition] = useTransition();
+
+  const router = useRouter();
 
   useEffect(() => {
     setIsMounted(true);
@@ -102,12 +107,24 @@ export function ProfileOptionsIcon({
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive hover:text-destructive/90 dark:hover:text-destructive/90">
-          <LogOutIcon
-            aria-hidden="true"
-            className="opacity-90 text-destructive"
-            size={16}
-          />
+        <DropdownMenuItem
+          onClick={() =>
+            startTransition(async () => {
+              await authClient.signOut();
+              router.push("/sign-in");
+            })
+          }
+          className="text-destructive hover:text-destructive/90 dark:hover:text-destructive/90"
+        >
+          {isSigningOut ? (
+            <Spinner className="text-destructive" />
+          ) : (
+            <LogOutIcon
+              aria-hidden="true"
+              className="opacity-90 text-destructive"
+              size={16}
+            />
+          )}
           <span>Sair</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

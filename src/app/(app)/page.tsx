@@ -8,7 +8,7 @@ import { UserOnboardProfile } from "@/components/user-onboard-profile";
 
 export default function Home() {
   return (
-    <div className="h-screen overflow-y-auto scrollbar-hide pt-14">
+    <div className="h-screen overflow-y-auto scrollbar-hide pt-5">
       <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 grid-rows-4 gap-4 w-full h-full p-4">
         <div className="md:col-span-3 xl:col-span-4 row-span-1 p-6">
           <div className="flex flex-col justify-between">

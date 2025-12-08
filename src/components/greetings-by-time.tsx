@@ -1,10 +1,20 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { authClient } from "@/lib/auth";
+import { Skeleton } from "./ui/skeleton";
 
 export function GreetingsByTime() {
   const { data: session } = authClient.useSession();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const fallbackName = useMemo(() => {
+    return session?.user?.name ?? "";
+  }, [session?.user?.name]);
 
   const isMorning = useMemo(() => {
     const now = new Date(Date.now());
@@ -28,11 +38,13 @@ export function GreetingsByTime() {
     if (isEvening) return "Boa noite";
     return "Olá";
   }, [isMorning, isAfternoon, isEvening]);
-  
+
   return (
     <h2 className="text-2xl font-bold">
       {greeting},{" "}
-      <span className="text-primary-foreground">{session?.user?.name}</span>
+      <span className="text-primary-foreground">
+        {isMounted ? fallbackName : <Skeleton className="w-20 h-4" />}
+      </span>
     </h2>
   );
 }
