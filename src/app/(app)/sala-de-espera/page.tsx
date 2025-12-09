@@ -22,7 +22,7 @@ const passengerStatusSchema = z.union([
   z.literal("Aguardando"),
   z.literal("Chamado"),
   z.literal("Não compareceu"),
-  z.literal("Aberto"),
+  z.literal("Entrou"),
 ]);
 
 // type PassengerStatus = z.infer<typeof passengerStatusSchema>;
@@ -261,6 +261,7 @@ export default function WaitingRoom() {
               <CardContent className="scrollbar-hide max-h-[275px] overflow-y-auto">
                 <CalledPax
                   calledPaxList={calledPaxList}
+                  paxList={paxList}
                   setPaxList={setPaxList}
                 />
               </CardContent>

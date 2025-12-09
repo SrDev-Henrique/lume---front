@@ -121,7 +121,7 @@ export function MobilePaxTabs({
               isOpen && isCalledOpen ? "opacity-100" : "opacity-0",
             )}
           >
-            <CalledPax calledPaxList={calledPaxList} setPaxList={setPaxList} />
+            <CalledPax calledPaxList={calledPaxList} paxList={paxList} setPaxList={setPaxList} />
           </div>
         </motion.div>
         <motion.div

@@ -3,8 +3,20 @@
 import { RiUserReceivedFill } from "@remixicon/react";
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import Toast from "@/components/toaster";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Empty,
   EmptyDescription,
@@ -13,14 +25,17 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import type { Passenger } from "../page";
+import { handlePassengerUpdate } from "../utils/handle-update-pax";
 
 const CALL_TIMEOUT_SECONDS = 15 * 60;
 
 export function CalledPax({
   calledPaxList,
+  paxList,
   setPaxList,
 }: {
   calledPaxList: Passenger[];
+  paxList: Passenger[];
   setPaxList: Dispatch<SetStateAction<Passenger[]>>;
 }) {
   const [timers, setTimers] = useState<Record<string, number>>({});
@@ -127,9 +142,61 @@ export function CalledPax({
                       "Nenhum acompanhante"
                     )}
                   </Badge>
-                  <Button size="sm" variant="outline">
-                    Pax entrou
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline">
+                        Pax entrou
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="w-full max-w-sm sm:w-sm">
+                      <DialogHeader>
+                        <DialogTitle className="text-accent-foreground">
+                          Confirmar a entrada do pax{" "}
+                          <span className="font-medium text-primary-foreground">
+                            {passenger.name}
+                          </span>
+                          ?
+                        </DialogTitle>
+                        <DialogDescription>
+                          A entrada do pax será confirmada e ele será removido
+                          da lista de espera.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter className="flex flex-col sm:flex-row">
+                        <Button
+                          size="sm"
+                          className="w-full sm:flex-1"
+                          onClick={() => {
+                            handlePassengerUpdate(
+                              {
+                                ...passenger,
+                                status: "Entrou",
+                              },
+                              paxList,
+                              setPaxList,
+                            );
+                            toast.custom((t) => (
+                              <Toast
+                                onClick={() => toast.dismiss(t)}
+                                message="Entrada confirmada com sucesso"
+                              />
+                            ));
+                          }}
+                        >
+                          Confirmar
+                        </Button>
+                        <DialogClose asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full sm:w-fit"
+                          >
+                            Cancelar
+                          </Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </div>

@@ -14,7 +14,7 @@ export default function SocialButtons() {
   const [isSubmitting, startTransition] = useTransition();
   const [signingInWith, setSigningInWith] = useState<string | null>(null);
   return (
-    <div className="flex justify-center items-center gap-2 w-full">
+    <div className="flex w-full items-center justify-center gap-2">
       {SUPPORTED_OAUTH_PROVIDERS.map((provider, index) => {
         const Icon = SUPPORTED_OAUTH_PROVIDER_DETAILS[provider].Icon;
         return (
