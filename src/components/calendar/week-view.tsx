@@ -43,7 +43,7 @@ interface PositionedEvent {
   top: number;
   height: number;
   left: number;
-  width: number;  
+  width: number;
   zIndex: number;
 }
 

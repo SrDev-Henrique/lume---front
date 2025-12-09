@@ -50,13 +50,13 @@ export function EditPaxDialog({
   }
   return (
     <Dialog open={isEditing} onOpenChange={setIsEditing}>
-      <DialogContent className="bg-card/60 backdrop-blur-sm w-sm">
+      <DialogContent className="w-sm bg-card/60 backdrop-blur-sm">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 justify-center text-lg text-primary-foreground font-medium">
+          <DialogTitle className="flex items-center justify-center gap-2 font-medium text-lg text-primary-foreground">
             <UserPenIcon className="size-5" />
             Editar passageiro ({editingPax.name})
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground text-center">
+          <DialogDescription className="text-center text-muted-foreground">
             Edite as informações do passageiro para atualizar a lista de espera.
           </DialogDescription>
         </DialogHeader>

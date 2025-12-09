@@ -8,20 +8,20 @@ import { UserOnboardProfile } from "@/components/user-onboard-profile";
 
 export default function Home() {
   return (
-    <div className="h-screen overflow-y-auto scrollbar-hide pt-5">
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 grid-rows-4 gap-4 w-full h-full p-4">
-        <div className="md:col-span-3 xl:col-span-4 row-span-1 p-6">
+    <div className="scrollbar-hide h-screen overflow-y-auto pt-5">
+      <div className="grid h-full w-full grid-cols-1 grid-rows-4 gap-4 p-4 md:grid-cols-3 xl:grid-cols-4">
+        <div className="row-span-1 p-6 md:col-span-3 xl:col-span-4">
           <div className="flex flex-col justify-between">
             <GreetingsByTime />
           </div>
         </div>
-        <div className="row-span-1 xl:row-span-3 flex flex-col gap-4 justify-between">
+        <div className="row-span-1 flex flex-col justify-between gap-4 xl:row-span-3">
           <UserOnboardProfile />
-          <div className="size-full rounded-xl relative overflow-hidden">
+          <div className="relative size-full overflow-hidden rounded-xl">
             <UserImage />
           </div>
         </div>
-        <Card className="col-span-2 xl:col-span-3 h-full row-span-3 overflow-y-auto scrollbar-hide p-0 rounded-3xl">
+        <Card className="scrollbar-hide col-span-2 row-span-3 h-full overflow-y-auto rounded-3xl p-0 xl:col-span-3">
           <CardContent className="p-0">
             <Calendar />
           </CardContent>

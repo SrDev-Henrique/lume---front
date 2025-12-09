@@ -1,14 +1,16 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 import PaxTable from "@/components/pax-table";
 import Toast from "@/components/toaster";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useIsTablet } from "@/hooks/use-mobile";
 import { CalledPax } from "./components/called-pax";
+import { MobilePaxTabs } from "./components/mobile-pax-tabs";
 import { NotArrivedPax } from "./components/not-arrived-pax";
 
 export type Passenger = z.infer<typeof addPassengerSchema>;
@@ -100,6 +102,15 @@ function createPassengerDefaults(): Passenger {
 
 export default function WaitingRoom() {
   const [paxList, setPaxList] = useState<Passenger[]>(initialPaxList);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const isTablet = useIsTablet();
+
+  console.log(isTablet);
 
   const form = useForm<Passenger>({
     resolver: zodResolver(addPassengerSchema),
@@ -143,30 +154,42 @@ export default function WaitingRoom() {
   }
 
   return (
-    <div className="absolute inset-0 px-4 flex items-start justify-center gap-4 overflow-y-auto scrollbar-hide pt-24 border">
-      <div className="w-fit min-w-[275px] h-[500px] text-primary-foreground space-y-4 pb-4">
-        <Card className="w-full max-w-md min-w-sm gap-2">
-          <CardHeader>
-            <CardTitle>Passageiros chamados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CalledPax calledPaxList={calledPaxList} setPaxList={setPaxList} />
-          </CardContent>
-        </Card>
-        <Card className="w-full max-w-md min-w-sm gap-2">
-          <CardHeader>
-            <CardTitle>Passageiros que não compareceram</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <NotArrivedPax
-              notArrivedPaxList={notArrivedPaxList}
-              paxList={paxList}
-              setPaxList={setPaxList}
-            />
-          </CardContent>
-        </Card>
-      </div>
-      <div className="flex-1 min-w-[375px] bg-card text-primary-foreground rounded-3xl p-4 border border-border/50 h-screen space-y-4">
+    <div className="scrollbar-hide absolute inset-0 flex items-start justify-center gap-4 overflow-y-auto border px-4 pt-24 pb-42 xl:pb-0">
+      {isTablet && isMounted ? (
+        <MobilePaxTabs
+          calledPaxList={calledPaxList}
+          notArrivedPaxList={notArrivedPaxList}
+          paxList={paxList}
+          setPaxList={setPaxList}
+        />
+      ) : (
+        <div className="hidden h-[500px] w-fit min-w-[275px] space-y-4 pb-4 text-primary-foreground xl:block">
+          <Card className="w-full min-w-sm max-w-md gap-2">
+            <CardHeader>
+              <CardTitle>Passageiros chamados</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CalledPax
+                calledPaxList={calledPaxList}
+                setPaxList={setPaxList}
+              />
+            </CardContent>
+          </Card>
+          <Card className="w-full min-w-sm max-w-md gap-2">
+            <CardHeader>
+              <CardTitle>Passageiros que não compareceram</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <NotArrivedPax
+                notArrivedPaxList={notArrivedPaxList}
+                paxList={paxList}
+                setPaxList={setPaxList}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      <div className="h-screen min-w-[375px] flex-1 space-y-4 rounded-3xl border border-border/50 bg-card p-4 text-primary-foreground">
         {/* <div className="w-full text-center">
           <h1 className="text-2xl font-semibold text-primary-foreground">
             Lista de espera

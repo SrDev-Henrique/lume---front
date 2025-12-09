@@ -77,6 +77,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { formatPhone, getPhoneDigits } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import Toast from "./toaster";
@@ -134,10 +135,12 @@ type Passenger = ZodInfer<typeof addPassengerSchema>;
 
 // Returns the current time, refreshing itself according to the interval.
 function useNow(intervalMs = 60_000) {
-  const [now, setNow] = useState(() => new Date(Date.now()));
+  const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date(Date.now())), intervalMs);
+    const update = () => setNow(new Date());
+    update();
+    const id = setInterval(update, intervalMs);
     return () => clearInterval(id);
   }, [intervalMs]);
 
@@ -147,10 +150,19 @@ function useNow(intervalMs = 60_000) {
 function ChegadaCell({ createdAt }: { createdAt: Date | string }) {
   const now = useNow();
   const createdDate = new Date(createdAt);
+  if (!now) {
+    return (
+      <span className="text-muted-foreground text-sm" aria-live="polite">
+        <span className="flex items-center gap-1">
+          <Clock12Icon className="size-4 animate-spin" /> Calculando espera...
+        </span>
+      </span>
+    );
+  }
   const minutes = Math.max(0, differenceInMinutes(now, createdDate));
 
   return (
-    <span className="text-sm text-muted-foreground">
+    <span className="text-muted-foreground text-sm">
       {minutes === 0 ? (
         "Chegou agora"
       ) : (
@@ -230,10 +242,10 @@ export default function PaxTable({
       filterFn: multiColumnFilterFn,
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-medium text-sm text-primary-foreground">
+          <span className="font-medium text-primary-foreground text-sm">
             {row.original.name}
           </span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-muted-foreground text-xs">
             {row.original.email ?? formatPhone(row.original.phone)}
           </span>
         </div>
@@ -280,7 +292,7 @@ export default function PaxTable({
         return (
           <Badge variant="outline" className="border-primary/70">
             {" "}
-            <div className="size-1.5 bg-primary/70 rounded-full me-1" />{" "}
+            <div className="me-1 size-1.5 rounded-full bg-primary/70" />{" "}
             {row.original.status}
           </Badge>
         );
@@ -327,6 +339,23 @@ export default function PaxTable({
       sorting,
     },
   });
+
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (!table) return;
+    const mobileHiddenColumns = ["guests", "arrivedAt", "status"];
+    mobileHiddenColumns.forEach((columnId) => {
+      const column = table.getColumn(columnId);
+      if (!column) {
+        return;
+      }
+      const shouldBeVisible = !isMobile;
+      if (column.getIsVisible() !== shouldBeVisible) {
+        column.toggleVisibility(shouldBeVisible);
+      }
+    });
+  }, [isMobile, table]);
 
   // const fromItem =
   //   table.getRowCount() === 0
@@ -399,7 +428,7 @@ export default function PaxTable({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="bg-card backdrop-blur-md"
+              className="bg-card/90 backdrop-blur-md"
               align="end"
             >
               <DropdownMenuLabel>Alternar colunas</DropdownMenuLabel>
@@ -441,7 +470,7 @@ export default function PaxTable({
                   </span>
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="bg-card backdrop-blur-md">
+              <AlertDialogContent className="bg-card/90 backdrop-blur-sm">
                 <div className="flex flex-col gap-2 max-sm:items-center sm:flex-row sm:gap-4">
                   <div
                     aria-hidden="true"
@@ -725,7 +754,7 @@ function AddPaxDialog({
           Adicionar pax
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-transparent p-0 w-max">
+      <DialogContent className="w-max border-none bg-transparent p-0">
         <DialogHeader className="hidden">
           <DialogTitle className="sr-only">Adicionar passageiro</DialogTitle>
           <DialogDescription className="sr-only">
@@ -733,9 +762,9 @@ function AddPaxDialog({
           </DialogDescription>
         </DialogHeader>
         {form && handleSubmit && (
-          <Card className="bg-card/60 backdrop-blur-sm ">
+          <Card className="bg-card/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 justify-center text-lg font-medium">
+              <CardTitle className="flex items-center justify-center gap-2 font-medium text-lg">
                 <UserPlusIcon className="size-5" />
                 Adicionar passageiro
               </CardTitle>
@@ -779,7 +808,10 @@ function RowActions({
             </Button>
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="bg-card backdrop-blur-md" align="end">
+        <DropdownMenuContent
+          className="bg-card/90 backdrop-blur-sm"
+          align="end"
+        >
           <DropdownMenuGroup>
             <DropdownMenuItem
               onClick={() => {
@@ -790,7 +822,7 @@ function RowActions({
               <Button
                 size="sm"
                 variant="ghost"
-                className="hover:bg-transparent dark:hover:bg-transparent p-0"
+                className="p-0 hover:bg-transparent dark:hover:bg-transparent"
               >
                 Editar
               </Button>
@@ -906,7 +938,7 @@ ${thanks} Obrigado!
           {message ?? "Chamar pax"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-card backdrop-blur-xs w-sm">
+      <DialogContent className="w-sm bg-card/90 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-primary-foreground">
             Chamar {passenger.name}
@@ -973,7 +1005,7 @@ ${thanks} Obrigado!
               </Button>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Nenhum canal de contato disponível.
             </p>
           )}

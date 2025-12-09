@@ -52,7 +52,7 @@ export function ProfileOptionsIcon({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          className="h-auto p-0 hover:bg-transparent dark:hover:bg-transparent rounded-full focus-visible:border-transparent focus-visible:ring-transparent"
+          className="h-auto rounded-full p-0 hover:bg-transparent focus-visible:border-transparent focus-visible:ring-transparent dark:hover:bg-transparent"
           variant="ghost"
         >
           <Avatar className="size-11">
@@ -71,7 +71,7 @@ export function ProfileOptionsIcon({
           />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="max-w-64 bg-card backdrop-blur-md border border-border/50">
+      <DropdownMenuContent className="me-4 max-w-64 border border-border/50 bg-card backdrop-blur-md">
         <DropdownMenuLabel className="flex min-w-0 flex-col">
           <span className="truncate font-medium text-primary-foreground text-sm">
             {name}
@@ -121,7 +121,7 @@ export function ProfileOptionsIcon({
           ) : (
             <LogOutIcon
               aria-hidden="true"
-              className="opacity-90 text-destructive"
+              className="text-destructive opacity-90"
               size={16}
             />
           )}

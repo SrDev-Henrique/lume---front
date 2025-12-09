@@ -8,7 +8,7 @@ export default function RootLayout({
   sheet: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen w-screen relative">
+    <div className="relative min-h-screen w-screen">
       <NavigationMenu />
       {children}
       {sheet}

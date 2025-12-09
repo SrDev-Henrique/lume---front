@@ -138,7 +138,7 @@ export function AddPassengerForm({
             />
           </TabsContent>
         </Tabs>
-        <Button type="submit" className="w-full mt-2">
+        <Button type="submit" className="mt-2 w-full">
           {" "}
           <RiAddCircleFill className="size-4" aria-hidden="true" /> Adicionar
         </Button>

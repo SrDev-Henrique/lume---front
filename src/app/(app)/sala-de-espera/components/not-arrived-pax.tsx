@@ -27,13 +27,13 @@ export function NotArrivedPax({
           {notArrivedPaxList.map((passenger) => (
             <div
               key={passenger.id}
-              className="flex items-start gap-2 border border-border/50 backdrop-brightness-50 rounded-lg p-2"
+              className="flex items-start gap-2 rounded-lg border border-border/50 p-2 backdrop-brightness-50"
             >
-              <div className="size-2 bg-red-500/70 rounded-full mt-1.5" />
-              <div className="w-full flex flex-col gap-2.5">
-                <div className="w-full grid grid-cols-2 gap-2">
-                  <div className="w-full flex items-start">
-                    <span className="text-sm font-medium">
+              <div className="mt-1.5 size-2 rounded-full bg-red-500/70" />
+              <div className="flex w-full flex-col gap-2.5">
+                <div className="grid w-full grid-cols-2 gap-2">
+                  <div className="flex w-full items-start">
+                    <span className="font-medium text-sm">
                       {passenger.name}
                     </span>
                   </div>
@@ -41,7 +41,7 @@ export function NotArrivedPax({
                   <div className="flex justify-end">
                     <Badge
                       variant="outline"
-                      className="text-primary-foreground h-fit"
+                      className="h-fit text-primary-foreground"
                     >
                       {passenger.guests && passenger.guests > 0 ? (
                         <p>
@@ -67,7 +67,7 @@ export function NotArrivedPax({
           ))}
         </div>
       ) : (
-        <Empty className="backdrop-brightness-50 w-full max-w-[335.100px] md:px-8 md:py-10">
+        <Empty className="w-full max-w-[335.100px] backdrop-brightness-50 md:px-8 md:py-10">
           <EmptyHeader>
             <EmptyMedia>
               <RiUserUnfollowFill className="size-6" />

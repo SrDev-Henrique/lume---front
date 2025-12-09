@@ -100,13 +100,13 @@ export function CalledPax({
           {calledPaxList.map((passenger) => (
             <div
               key={passenger.id}
-              className="flex items-start gap-2 border border-border/50 backdrop-brightness-50 rounded-lg p-2"
+              className="flex items-start gap-2 rounded-lg border border-border/50 p-2 backdrop-brightness-50"
             >
-              <div className="size-2 bg-green-500/70 rounded-full mt-1.5" />
-              <div className="w-full grid grid-cols-2 gap-2">
-                <div className="w-full flex flex-col justify-between gap-2.5 pb-2">
-                  <span className="text-sm font-medium">{passenger.name}</span>
-                  <p className="text-xs text-muted-foreground">
+              <div className="mt-1.5 size-2 rounded-full bg-green-500/70" />
+              <div className="grid w-full grid-cols-2 gap-2">
+                <div className="flex w-full flex-col justify-between gap-2.5 pb-2">
+                  <span className="font-medium text-sm">{passenger.name}</span>
+                  <p className="text-muted-foreground text-xs">
                     Aguardando:{" "}
                     {secondsToMinutes(
                       timers[passenger.id] ?? CALL_TIMEOUT_SECONDS,
@@ -114,7 +114,10 @@ export function CalledPax({
                   </p>
                 </div>
                 <div className="flex flex-col justify-between gap-2.5">
-                  <Badge variant="outline" className="text-primary-foreground h-fit self-end">
+                  <Badge
+                    variant="outline"
+                    className="h-fit self-end text-primary-foreground"
+                  >
                     {passenger.guests && passenger.guests > 0 ? (
                       <p>
                         <span className="text-primary">{passenger.guests}</span>{" "}
@@ -133,7 +136,7 @@ export function CalledPax({
           ))}
         </div>
       ) : (
-        <Empty className="backdrop-brightness-50 w-full max-w-[335.100px] md:px-8 md:py-10">
+        <Empty className="w-full max-w-[335.100px] backdrop-brightness-50 md:px-8 md:py-10">
           <EmptyHeader>
             <EmptyMedia>
               <RiUserReceivedFill className="size-6" />

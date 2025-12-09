@@ -128,9 +128,9 @@ export function Notifications() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-1 bg-card backdrop-blur-md border border-border/50">
+      <PopoverContent className="me-4 w-80 border border-border/50 bg-card p-1 backdrop-blur-md">
         <div className="flex items-baseline justify-between gap-4 px-3 py-2">
-          <div className="font-semibold text-sm text-primary-foreground">
+          <div className="font-semibold text-primary-foreground text-sm">
             Notificações
           </div>
           {unreadCount > 0 && (
@@ -148,7 +148,7 @@ export function Notifications() {
           <div
             className={cn(
               "rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent",
-              notification.unread && "bg-primary/10 mb-1.5",
+              notification.unread && "mb-1.5 bg-primary/10",
             )}
             key={notification.id}
           >
@@ -166,7 +166,7 @@ export function Notifications() {
               </Avatar>
               <div className="flex-1 space-y-1">
                 <button
-                  className="text-left text-foreground font-medium after:absolute after:inset-0"
+                  className="text-left font-medium text-foreground after:absolute after:inset-0"
                   onClick={() => handleNotificationClick(notification.id)}
                   type="button"
                 >
