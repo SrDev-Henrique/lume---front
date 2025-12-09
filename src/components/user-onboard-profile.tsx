@@ -3,7 +3,7 @@
 import { LogOut, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   Card,
   CardContent,
@@ -16,12 +16,14 @@ import { authClient } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
+import { Skeleton } from "./ui/skeleton";
 
 export function UserOnboardProfile() {
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session } = authClient.useSession();
   const router = useRouter();
 
   const [isSigningOut, startTransition] = useTransition();
+  const [hasMounted, setHasMounted] = useState(false);
 
   function handleSignOut() {
     startTransition(async () => {
@@ -31,26 +33,19 @@ export function UserOnboardProfile() {
   }
 
   useEffect(() => {
-    if (!isPending && !session) {
-      router.push("/sign-in");
-    }
-  }, [isPending, router, session]);
+    setHasMounted(true);
+  }, []);
 
-  if (isPending) {
-    return (
-      <div className="absolute inset-0 z-100 bg-background flex flex-col items-center justify-center gap-4 min-h-screen">
-        <h1>Carregando sessão</h1>
-        <Spinner />
-      </div>
-    );
-  }
+  const fallbackInitial = useMemo(() => {
+    const source =
+      session?.user?.name?.trim() || session?.user?.email?.trim() || "";
+    return source ? source.charAt(0).toUpperCase() : "";
+  }, [session?.user?.email, session?.user?.name]);
 
-  if (!session) {
-    return null;
-  }
+  const showSessionData = hasMounted && Boolean(session);
 
   return (
-    <div className="flex items-center justify-center w-full h-fit">
+    <div className="flex h-fit w-full items-center justify-center">
       <Card className="size-full">
         <CardHeader>
           <CardTitle>Bem-vindo</CardTitle>
@@ -60,20 +55,30 @@ export function UserOnboardProfile() {
           <div className="flex items-center gap-2">
             <Avatar>
               <AvatarImage src={session?.user?.image ?? ""} />
-              <AvatarFallback>
-                {session?.user?.name?.charAt(0).toUpperCase()}
+              <AvatarFallback suppressHydrationWarning>
+                {hasMounted ? fallbackInitial : null}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <p className="text-sm font-medium">{session?.user?.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {session?.user?.email}
-              </p>
+              <div className="font-medium text-sm">
+                {showSessionData ? (
+                  <p>{session?.user?.name}</p>
+                ) : (
+                  <Skeleton className="h-4 w-28" />
+                )}
+              </div>
+              <div className="text-muted-foreground text-sm">
+                {showSessionData ? (
+                  <p>{session?.user?.email}</p>
+                ) : (
+                  <Skeleton className="mt-1 h-3 w-40" />
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
         <CardFooter>
-          <div className="flex items-center justify-between w-full">
+          <div className="flex w-full items-center justify-between">
             <Button variant="secondary" asChild>
               <Link href="/sala-de-espera">
                 <MessageSquare className="size-4" />

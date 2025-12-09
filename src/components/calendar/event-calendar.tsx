@@ -286,7 +286,7 @@ export function EventCalendar({
             className,
           )}
         >
-          <div className="flex items-center gap-1 sm:gap-[35%] w-full">
+          <div className="flex w-full items-center gap-1 sm:gap-[35%]">
             <Button
               className="max-[479px]:aspect-square max-[479px]:p-0!"
               onClick={handleToday}

@@ -234,7 +234,7 @@ export function EventDialog({
 
   return (
     <Dialog onOpenChange={(open) => !open && onClose()} open={isOpen}>
-      <DialogContent className="sm:max-w-[425px] bg-card backdrop-blur-md">
+      <DialogContent className="bg-card backdrop-blur-md sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
             {event?.id ? "Editar Evento" : "Criar Evento"}
@@ -476,7 +476,7 @@ export function EventDialog({
                   <RiDeleteBinLine aria-hidden="true" size={16} />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[325px] bg-card backdrop-blur-md">
+              <DialogContent className="bg-card backdrop-blur-md sm:max-w-[325px]">
                 <DialogHeader>
                   <DialogTitle>Deletar Evento</DialogTitle>
                   <DialogDescription>

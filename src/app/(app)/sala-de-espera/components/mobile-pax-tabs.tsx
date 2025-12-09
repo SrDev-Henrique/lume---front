@@ -14,7 +14,7 @@ export function MobilePaxTabs({
   setPaxList: Dispatch<SetStateAction<Passenger[]>>;
 }) {
   return (
-    <div className="group fixed right-1/2 bottom-4 translate-x-1/2 cursor-default rounded-xl border border-input/50 bg-card p-2 backdrop-blur-sm">
+    <div className="group fixed right-1/2 bottom-4 z-150 translate-x-1/2 cursor-default rounded-xl border border-input/50 bg-card p-2 backdrop-blur-sm">
       <div className="flex flex-col justify-center gap-2">
         <div className="overflow-hidden rounded-full p-4 backdrop-brightness-70">
           <div className="flex items-center justify-between">

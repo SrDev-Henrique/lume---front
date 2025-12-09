@@ -1,12 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeftIcon } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 import PaxTable from "@/components/pax-table";
 import Toast from "@/components/toaster";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIsTablet } from "@/hooks/use-mobile";
 import { CalledPax } from "./components/called-pax";
@@ -58,7 +61,7 @@ const initialPaxList: Passenger[] = [
     name: "Jim Beam",
     email: "jim.beam@example.com",
     guests: 2,
-    status: "Não compareceu",
+    status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 20),
   },
   {
@@ -66,7 +69,87 @@ const initialPaxList: Passenger[] = [
     name: "John Doe",
     email: "john.doe@example.com",
     guests: 2,
-    status: "Chamado",
+    status: "Aguardando",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "John Doe",
+    email: "john.doe@example.com",
+    guests: 2,
+    status: "Aguardando",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "John Doe",
+    email: "john.doe@example.com",
+    guests: 2,
+    status: "Aguardando",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "John Doe",
+    email: "john.doe@example.com",
+    guests: 2,
+    status: "Aguardando",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "John Doe",
+    email: "john.doe@example.com",
+    guests: 2,
+    status: "Aguardando",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "John Doe",
+    email: "john.doe@example.com",
+    guests: 2,
+    status: "Aguardando",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "John Doe",
+    email: "john.doe@example.com",
+    guests: 2,
+    status: "Aguardando",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "John Doe",
+    email: "john.doe@example.com",
+    guests: 2,
+    status: "Aguardando",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "John Doe",
+    email: "john.doe@example.com",
+    guests: 2,
+    status: "Aguardando",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "John Doe",
+    email: "john.doe@example.com",
+    guests: 2,
+    status: "Aguardando",
+    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "John Doe",
+    email: "john.doe@example.com",
+    guests: 2,
+    status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 20),
   },
   {
@@ -74,7 +157,7 @@ const initialPaxList: Passenger[] = [
     name: "Jane Doe",
     email: "jane.doe@example.com",
     guests: 2,
-    status: "Aguardando",
+    status: "Chamado",
     createdAt: new Date(Date.now() - 1000 * 60 * 20),
   },
   {
@@ -83,7 +166,7 @@ const initialPaxList: Passenger[] = [
     email: "jill.johnson@example.com",
     phone: 19994012785,
     guests: 2,
-    status: "Aguardando",
+    status: "Não compareceu",
     createdAt: new Date(Date.now() - 1000 * 60 * 30),
   },
 ];
@@ -109,8 +192,6 @@ export default function WaitingRoom() {
   }, []);
 
   const isTablet = useIsTablet();
-
-  console.log(isTablet);
 
   const form = useForm<Passenger>({
     resolver: zodResolver(addPassengerSchema),
@@ -154,54 +235,64 @@ export default function WaitingRoom() {
   }
 
   return (
-    <div className="scrollbar-hide absolute inset-0 flex items-start justify-center gap-4 overflow-y-auto border px-4 pt-24 pb-42 xl:pb-0">
-      {isTablet && isMounted ? (
-        <MobilePaxTabs
-          calledPaxList={calledPaxList}
-          notArrivedPaxList={notArrivedPaxList}
-          paxList={paxList}
-          setPaxList={setPaxList}
-        />
-      ) : (
-        <div className="hidden h-[500px] w-fit min-w-[275px] space-y-4 pb-4 text-primary-foreground xl:block">
-          <Card className="w-full min-w-sm max-w-md gap-2">
-            <CardHeader>
-              <CardTitle>Passageiros chamados</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CalledPax
-                calledPaxList={calledPaxList}
-                setPaxList={setPaxList}
-              />
-            </CardContent>
-          </Card>
-          <Card className="w-full min-w-sm max-w-md gap-2">
-            <CardHeader>
-              <CardTitle>Passageiros que não compareceram</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <NotArrivedPax
-                notArrivedPaxList={notArrivedPaxList}
-                paxList={paxList}
-                setPaxList={setPaxList}
-              />
-            </CardContent>
-          </Card>
-        </div>
-      )}
-      <div className="h-screen min-w-[375px] flex-1 space-y-4 rounded-3xl border border-border/50 bg-card p-4 text-primary-foreground">
-        {/* <div className="w-full text-center">
+    <div className="relative h-screen w-full">
+      <div className="absolute top-4 left-4 z-50 w-fit">
+        <Button variant="secondary" asChild>
+          <Link href="/">
+            <ArrowLeftIcon className="size-4" />
+            Voltar
+          </Link>
+        </Button>
+      </div>
+      <div className="scrollbar-hide absolute inset-0 flex items-start justify-center gap-4 overflow-y-auto border px-4 pt-24 pb-42 xl:pb-0">
+        {isTablet && isMounted ? (
+          <MobilePaxTabs
+            calledPaxList={calledPaxList}
+            notArrivedPaxList={notArrivedPaxList}
+            paxList={paxList}
+            setPaxList={setPaxList}
+          />
+        ) : (
+          <div className="hidden h-[500px] w-fit min-w-[275px] space-y-4 pb-4 text-primary-foreground xl:block">
+            <Card className="w-full min-w-sm max-w-md gap-2">
+              <CardHeader>
+                <CardTitle>Passageiros chamados</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CalledPax
+                  calledPaxList={calledPaxList}
+                  setPaxList={setPaxList}
+                />
+              </CardContent>
+            </Card>
+            <Card className="w-full min-w-sm max-w-md gap-2">
+              <CardHeader>
+                <CardTitle>Passageiros que não compareceram</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <NotArrivedPax
+                  notArrivedPaxList={notArrivedPaxList}
+                  paxList={paxList}
+                  setPaxList={setPaxList}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        <div className="h-screen min-w-[375px] flex-1 space-y-4 rounded-3xl border border-border/50 bg-card p-4 text-primary-foreground">
+          {/* <div className="w-full text-center">
           <h1 className="text-2xl font-semibold text-primary-foreground">
             Lista de espera
           </h1>
         </div> */}
-        <PaxTable
-          data={filteredData}
-          form={form}
-          handleSubmit={handleSubmit}
-          paxList={paxList}
-          setPaxList={setPaxList}
-        />
+          <PaxTable
+            data={filteredData}
+            form={form}
+            handleSubmit={handleSubmit}
+            paxList={paxList}
+            setPaxList={setPaxList}
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,50 +1,54 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
 import { authClient } from "@/lib/auth";
+
 import { Skeleton } from "./ui/skeleton";
+
+const DEFAULT_GREETING = "Olá";
 
 export function GreetingsByTime() {
   const { data: session } = authClient.useSession();
-  const [isMounted, setIsMounted] = useState(false);
+  const [greeting, setGreeting] = useState(DEFAULT_GREETING);
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    setHasMounted(true);
   }, []);
 
-  const fallbackName = useMemo(() => {
-    return session?.user?.name ?? "";
-  }, [session?.user?.name]);
-
-  const isMorning = useMemo(() => {
-    const now = new Date(Date.now());
+  useEffect(() => {
+    const now = new Date();
     const hour = now.getHours();
-    return hour < 12;
-  }, []);
-  const isAfternoon = useMemo(() => {
-    const now = new Date(Date.now());
-    const hour = now.getHours();
-    return hour >= 12 && hour < 18;
-  }, []);
-  const isEvening = useMemo(() => {
-    const now = new Date(Date.now());
-    const hour = now.getHours();
-    return hour >= 18;
+    if (hour < 12) {
+      setGreeting("Bom dia");
+    } else if (hour < 18) {
+      setGreeting("Boa tarde");
+    } else {
+      setGreeting("Boa noite");
+    }
   }, []);
 
-  const greeting = useMemo(() => {
-    if (isMorning) return "Bom dia";
-    if (isAfternoon) return "Boa tarde";
-    if (isEvening) return "Boa noite";
-    return "Olá";
-  }, [isMorning, isAfternoon, isEvening]);
+  const displayName = useMemo(() => {
+    if (!hasMounted) return "";
+    return session?.user?.name?.trim() ?? "";
+  }, [hasMounted, session?.user?.name]);
+
+  const shouldShowName = displayName.length > 0;
 
   return (
-    <h2 className="text-2xl font-bold">
+    <div className="flex items-center gap-2 font-bold text-2xl">
       {greeting},{" "}
-      <span className="text-primary-foreground">
-        {isMounted ? fallbackName : <Skeleton className="w-20 h-4" />}
-      </span>
-    </h2>
+      <div className="text-primary-foreground">
+        {shouldShowName ? (
+          <span>{displayName}</span>
+        ) : (
+          <Skeleton
+            aria-label="Carregando nome do usuário"
+            className="h-4 w-24"
+          />
+        )}
+      </div>
+    </div>
   );
 }
