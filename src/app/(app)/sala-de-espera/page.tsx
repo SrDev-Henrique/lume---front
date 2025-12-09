@@ -258,7 +258,7 @@ export default function WaitingRoom() {
               <CardHeader>
                 <CardTitle>Passageiros chamados</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="scrollbar-hide max-h-[275px] overflow-y-auto">
                 <CalledPax
                   calledPaxList={calledPaxList}
                   setPaxList={setPaxList}
@@ -269,7 +269,7 @@ export default function WaitingRoom() {
               <CardHeader>
                 <CardTitle>Passageiros que não compareceram</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="scrollbar-hide max-h-[275px] overflow-y-auto">
                 <NotArrivedPax
                   notArrivedPaxList={notArrivedPaxList}
                   paxList={paxList}
@@ -279,7 +279,7 @@ export default function WaitingRoom() {
             </Card>
           </div>
         )}
-        <div className="h-screen min-w-[375px] flex-1 space-y-4 rounded-3xl border border-border/50 bg-card p-4 text-primary-foreground">
+        <div className="h-fit min-w-[375px] flex-1 space-y-4 rounded-3xl border border-border/50 bg-card p-4 text-primary-foreground">
           {/* <div className="w-full text-center">
           <h1 className="text-2xl font-semibold text-primary-foreground">
             Lista de espera

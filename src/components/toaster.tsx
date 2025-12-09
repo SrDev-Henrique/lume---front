@@ -22,7 +22,7 @@ export default function Toast({
   actionLabel?: string;
 }) {
   return (
-    <div className="bg-card backdrop-blur-md text-foreground w-full rounded-xl border px-4 py-3 shadow-lg sm:w-(--width)">
+    <div className="mx-auto w-fit max-w-[375px] rounded-xl border bg-card px-4 py-3 text-foreground shadow-lg backdrop-blur-md sm:w-(--width)">
       {error ? (
         <div className="flex gap-2">
           <div className="flex grow gap-3">
@@ -33,8 +33,8 @@ export default function Toast({
             />
             <div className="flex grow flex-col gap-3">
               <div className="space-y-1">
-                <p className="text-sm font-medium">{message}:</p>
-                <p className="text-sm text-muted-foreground">{errorMessage}</p>
+                <p className="font-medium text-sm">{message}:</p>
+                <p className="text-muted-foreground text-sm">{errorMessage}</p>
               </div>
               <div className="flex gap-2">
                 <Button size="sm" onClick={onClick}>
@@ -66,10 +66,10 @@ export default function Toast({
             />
             <div className="flex grow flex-col gap-3">
               <div className="space-y-1">
-                <p className="text-sm text-primary-foreground font-medium">
+                <p className="font-medium text-primary-foreground text-sm">
                   Sucesso:
                 </p>
-                <p className="text-sm text-muted-foreground">{message}</p>
+                <p className="text-muted-foreground text-sm">{message}</p>
               </div>
               <div className="flex gap-2">
                 {action && (

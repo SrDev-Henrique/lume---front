@@ -67,7 +67,7 @@ export function NotArrivedPax({
           ))}
         </div>
       ) : (
-        <Empty className="w-full max-w-[335.100px] backdrop-brightness-50 md:px-8 md:py-10">
+        <Empty className="my-auto w-full max-w-[335.100px] backdrop-brightness-50 md:px-8 md:py-10">
           <EmptyHeader>
             <EmptyMedia>
               <RiUserUnfollowFill className="size-6" />

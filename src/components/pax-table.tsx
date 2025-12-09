@@ -375,8 +375,8 @@ export default function PaxTable({
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col flex-wrap items-center justify-between gap-3 md:flex-row">
+        <div className="flex w-full items-center justify-between gap-3 md:w-fit md:justify-start">
           {/* Filter by name or email */}
           <div className="relative">
             <Input
@@ -453,7 +453,7 @@ export default function PaxTable({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex w-full items-center justify-between gap-3 md:w-fit md:justify-start">
           {/* Delete button */}
           {table.getSelectedRowModel().rows.length > 0 && (
             <AlertDialog>

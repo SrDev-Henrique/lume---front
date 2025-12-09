@@ -220,4 +220,7 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
   }
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
 }
