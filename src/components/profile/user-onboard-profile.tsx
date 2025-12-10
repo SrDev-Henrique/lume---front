@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
-import { Skeleton } from "./ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
+import { Skeleton } from "../ui/skeleton";
 
 export function UserOnboardProfile() {
   const { data: session } = authClient.useSession();
@@ -54,7 +54,7 @@ export function UserOnboardProfile() {
         <CardContent>
           <div className="flex items-center gap-2">
             <Avatar>
-              <AvatarImage src={session?.user?.image ?? ""} />
+              <AvatarImage src={session?.user?.image ?? undefined} />
               <AvatarFallback suppressHydrationWarning>
                 {hasMounted ? fallbackInitial : null}
               </AvatarFallback>

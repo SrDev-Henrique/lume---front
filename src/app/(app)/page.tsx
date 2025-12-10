@@ -2,8 +2,8 @@ import { Calendar } from "@/components/calendar";
 import { GreetingsByTime } from "@/components/greetings-by-time";
 import { LoadingSession } from "@/components/loading-session";
 import { UserImage } from "@/components/profile/user-image";
+import { UserOnboardProfile } from "@/components/profile/user-onboard-profile";
 import { Card, CardContent } from "@/components/ui/card";
-import { UserOnboardProfile } from "@/components/user-onboard-profile";
 
 // Todo: Fix grid layout issues
 
