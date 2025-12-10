@@ -39,9 +39,9 @@ export function NavigationMenu() {
             <Link key={item.href} href={item.href}>
               <div
                 className={cn(
-                  "flex w-fit cursor-pointer items-center gap-2 rounded-3xl border border-input bg-input/30 px-3 py-2 font-medium text-secondary transition-all duration-300 hover:bg-input/50 hover:text-secondary",
+                  "flex w-fit cursor-pointer items-center gap-2 rounded-3xl border border-input bg-input/30 px-3 py-2 font-medium transition-all duration-300 hover:bg-input/50 hover:text-secondary",
                   isActive(item.href) &&
-                    "border-primary/70 bg-primary/50 hover:bg-primary/50",
+                    "border-primary/70 bg-primary/50 text-primary-foreground hover:bg-primary/50 hover:text-primary-foreground",
                 )}
               >
                 {item.icon}

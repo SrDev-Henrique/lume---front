@@ -244,7 +244,7 @@ export default function WaitingRoom() {
           </Link>
         </Button>
       </div>
-      <div className="scrollbar-hide absolute inset-0 flex flex-row-reverse items-start justify-center gap-4 overflow-y-auto border px-4 pt-24 pb-42 xl:pb-4">
+      <div className="scrollbar-hide absolute inset-0 flex items-start justify-center gap-4 overflow-y-auto border px-4 pt-24 pb-42 xl:pb-4">
         {isTablet && isMounted ? (
           <MobilePaxTabs
             calledPaxList={calledPaxList}
