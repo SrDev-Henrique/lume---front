@@ -1,7 +1,9 @@
 import { RiUserUnfollowFill } from "@remixicon/react";
-import type { Dispatch, SetStateAction } from "react";
+import { TrashIcon } from "lucide-react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import { ContactDialog } from "@/components/pax-table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyDescription,
@@ -10,6 +12,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import type { Passenger } from "../page";
+import { DeletePaxDialog } from "./delete-pax-dialog";
 
 export function NotArrivedPax({
   notArrivedPaxList,
@@ -18,8 +21,9 @@ export function NotArrivedPax({
 }: {
   notArrivedPaxList: Passenger[];
   paxList?: Passenger[];
-  setPaxList?: Dispatch<SetStateAction<Passenger[]>>;
+  setPaxList: Dispatch<SetStateAction<Passenger[]>>;
 }) {
+  const [isDeleting, setIsDeleting] = useState(false);
   return (
     <>
       {notArrivedPaxList.length > 0 ? (
@@ -63,6 +67,20 @@ export function NotArrivedPax({
                   setPaxList={setPaxList}
                 />
               </div>
+              <Button
+                className="size-7"
+                variant="destructive"
+                onClick={() => setIsDeleting(true)}
+              >
+                <TrashIcon aria-hidden="true" className="size-3" />
+              </Button>
+              <DeletePaxDialog
+                deletingPax={passenger}
+                isDeleting={isDeleting}
+                setIsDeleting={setIsDeleting}
+                paxList={notArrivedPaxList}
+                setPaxList={setPaxList}
+              />
             </div>
           ))}
         </div>

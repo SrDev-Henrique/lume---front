@@ -48,11 +48,14 @@ import {
 } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
-import type { infer as ZodInfer, z } from "zod";
+import type { infer as ZodInfer } from "zod";
 import { AddPassengerForm } from "@/app/(app)/sala-de-espera/components/add-passenger-form";
 import { DeletePaxDialog } from "@/app/(app)/sala-de-espera/components/delete-pax-dialog";
 import { EditPaxDialog } from "@/app/(app)/sala-de-espera/components/edit-pax-dialog";
-import type { addPassengerSchema } from "@/app/(app)/sala-de-espera/page";
+import type {
+  addPassengerSchema,
+  PassengerFormValues,
+} from "@/app/(app)/sala-de-espera/page";
 import { handlePassengerUpdate } from "@/app/(app)/sala-de-espera/utils/handle-update-pax";
 import { sendPaxCall } from "@/app/(app)/sala-de-espera/utils/send-pax-call";
 import { Button } from "@/components/ui/button";
@@ -195,8 +198,8 @@ export default function PaxTable({
   setPaxList,
 }: {
   data: Passenger[];
-  form?: UseFormReturn<z.infer<typeof addPassengerSchema>>;
-  handleSubmit?: (data: z.infer<typeof addPassengerSchema>) => void;
+  form?: UseFormReturn<PassengerFormValues>;
+  handleSubmit?: (data: PassengerFormValues) => void;
   paxList: Passenger[];
   setPaxList: Dispatch<SetStateAction<Passenger[]>>;
 }) {
@@ -769,8 +772,8 @@ function AddPaxDialog({
   form,
   handleSubmit,
 }: {
-  form: UseFormReturn<z.infer<typeof addPassengerSchema>>;
-  handleSubmit: (data: z.infer<typeof addPassengerSchema>) => void;
+  form: UseFormReturn<PassengerFormValues>;
+  handleSubmit: (data: PassengerFormValues) => void;
 }) {
   return (
     <Dialog>
@@ -1030,10 +1033,18 @@ ${thanks} Obrigado!
                           message="Chamada enviada com sucesso"
                         />
                       ));
-                      await handlePassengerUpdate(
+                      handlePassengerUpdate(
                         {
                           ...passenger,
+                          calledAt: new Date(),
                           status: "Chamado",
+                          eventsHistory: [
+                            ...passenger.eventsHistory,
+                            {
+                              event: "chamado",
+                              timestamp: new Date(),
+                            },
+                          ],
                         },
                         paxList ?? [],
                         setPaxList ??

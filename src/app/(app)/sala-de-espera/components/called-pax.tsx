@@ -90,7 +90,18 @@ export function CalledPax({
         setPaxList((current) =>
           current.map((passenger) =>
             expiredIds.includes(passenger.id)
-              ? { ...passenger, status: "Não compareceu" }
+              ? {
+                  ...passenger,
+                  status: "Não compareceu",
+                  notArrivedAt: new Date(),
+                  eventsHistory: [
+                    ...passenger.eventsHistory,
+                    {
+                      event: "não compareceu",
+                      timestamp: new Date(),
+                    },
+                  ],
+                }
               : passenger,
           ),
         );
@@ -120,7 +131,9 @@ export function CalledPax({
               <div className="mt-1.5 size-2 rounded-full bg-green-500/70" />
               <div className="grid w-full grid-cols-2 gap-2">
                 <div className="flex w-full flex-col justify-between gap-2.5 pb-2">
-                  <span className="font-medium text-sm">{passenger.name}</span>
+                  <span className="text-nowrap font-medium text-sm sm:text-wrap">
+                    {passenger.name}
+                  </span>
                   <p className="text-muted-foreground text-xs">
                     Aguardando:{" "}
                     {secondsToMinutes(
@@ -171,6 +184,14 @@ export function CalledPax({
                               {
                                 ...passenger,
                                 status: "Entrou",
+                                enteredAt: new Date(),
+                                eventsHistory: [
+                                  ...passenger.eventsHistory,
+                                  {
+                                    event: "entrou",
+                                    timestamp: new Date(),
+                                  },
+                                ],
                               },
                               paxList,
                               setPaxList,

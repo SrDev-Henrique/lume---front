@@ -1,6 +1,5 @@
 import { RiAddCircleFill } from "@remixicon/react";
 import type { UseFormReturn } from "react-hook-form";
-import type z from "zod";
 import NumberInput from "@/components/number-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,14 +13,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPhone, getPhoneDigits } from "@/lib/phone";
-import type { addPassengerSchema } from "../page";
+import type { PassengerFormValues } from "../page";
 
 export function AddPassengerForm({
   form,
   handleSubmit,
 }: {
-  form: UseFormReturn<z.infer<typeof addPassengerSchema>>;
-  handleSubmit: (data: z.infer<typeof addPassengerSchema>) => void;
+  form: UseFormReturn<PassengerFormValues>;
+  handleSubmit: (data: PassengerFormValues) => void;
 }) {
   return (
     <Form {...form}>

@@ -17,6 +17,7 @@ import { MobilePaxTabs } from "./components/mobile-pax-tabs";
 import { NotArrivedPax } from "./components/not-arrived-pax";
 
 export type Passenger = z.infer<typeof addPassengerSchema>;
+export type PassengerFormValues = z.input<typeof addPassengerSchema>;
 
 const passengerStatusSchema = z.union([
   z.literal("Aguardando"),
@@ -36,6 +37,17 @@ export const addPassengerSchema = z
     phone: z.number().optional(),
     guests: z.number().optional(),
     createdAt: z.date(),
+    calledAt: z.date().optional(),
+    enteredAt: z.date().optional(),
+    notArrivedAt: z.date().optional(),
+    eventsHistory: z
+      .array(
+        z.object({
+          event: z.enum(["chamado", "entrou", "não compareceu"]),
+          timestamp: z.date(),
+        }),
+      )
+      .default([]),
   })
   .superRefine((data, ctx) => {
     const hasEmail = typeof data.email === "string" && data.email.length > 0;
@@ -63,6 +75,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -71,6 +84,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 21),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -79,6 +93,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 22),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -87,6 +102,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 23),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -95,6 +111,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 24),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -103,6 +120,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 25),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -111,6 +129,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 26),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -119,6 +138,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 27),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -127,6 +147,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 28),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -135,6 +156,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 29),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -143,6 +165,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 30),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -151,6 +174,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Aguardando",
     createdAt: new Date(Date.now() - 1000 * 60 * 31),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -159,6 +183,7 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Chamado",
     createdAt: new Date(Date.now() - 1000 * 60 * 32),
+    eventsHistory: [],
   },
   {
     id: crypto.randomUUID(),
@@ -168,10 +193,11 @@ const initialPaxList: Passenger[] = [
     guests: 2,
     status: "Não compareceu",
     createdAt: new Date(Date.now() - 1000 * 60 * 33),
+    eventsHistory: [],
   },
 ];
 
-function createPassengerDefaults(): Passenger {
+function createPassengerDefaults(): PassengerFormValues {
   return {
     id: crypto.randomUUID(),
     name: "",
@@ -180,6 +206,7 @@ function createPassengerDefaults(): Passenger {
     guests: undefined,
     status: "Aguardando",
     createdAt: new Date(),
+    eventsHistory: [],
   };
 }
 
@@ -193,7 +220,7 @@ export default function WaitingRoom() {
 
   const isTablet = useIsTablet();
 
-  const form = useForm<Passenger>({
+  const form = useForm<PassengerFormValues>({
     resolver: zodResolver(addPassengerSchema),
     defaultValues: createPassengerDefaults(),
   });
@@ -213,11 +240,12 @@ export default function WaitingRoom() {
     return passengers;
   });
 
-  function handleSubmit(data: Passenger) {
+  function handleSubmit(data: PassengerFormValues) {
     const passenger: Passenger = {
       ...data,
       id: crypto.randomUUID(),
       createdAt: new Date(),
+      eventsHistory: data.eventsHistory ?? [],
     };
 
     setPaxList((prev) => [...prev, passenger]);

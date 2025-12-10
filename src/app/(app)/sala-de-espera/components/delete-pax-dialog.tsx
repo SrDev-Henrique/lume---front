@@ -4,6 +4,7 @@ import Toast from "@/components/toaster";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -43,7 +44,7 @@ export function DeletePaxDialog({
             className="w-full sm:flex-1"
             onClick={() => {
               setPaxList(paxList.filter((pax) => pax.id !== deletingPax.id));
-              setIsDeleting(false);
+              setIsDeleting?.(false);
               toast.custom((t) => (
                 <Toast
                   onClick={() => toast.dismiss(t)}
@@ -54,9 +55,11 @@ export function DeletePaxDialog({
           >
             Deletar
           </Button>
-          <Button variant="outline" className="w-full sm:w-fit">
-            Cancelar
-          </Button>
+          <DialogClose asChild>
+            <Button variant="outline" className="w-full sm:w-fit">
+              Cancelar
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>
