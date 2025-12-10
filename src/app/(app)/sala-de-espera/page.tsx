@@ -70,7 +70,7 @@ const initialPaxList: Passenger[] = [
     email: "john.doe@example.com",
     guests: 2,
     status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 21),
   },
   {
     id: crypto.randomUUID(),
@@ -78,7 +78,7 @@ const initialPaxList: Passenger[] = [
     email: "john.doe@example.com",
     guests: 2,
     status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 22),
   },
   {
     id: crypto.randomUUID(),
@@ -86,7 +86,7 @@ const initialPaxList: Passenger[] = [
     email: "john.doe@example.com",
     guests: 2,
     status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 23),
   },
   {
     id: crypto.randomUUID(),
@@ -94,7 +94,7 @@ const initialPaxList: Passenger[] = [
     email: "john.doe@example.com",
     guests: 2,
     status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 24),
   },
   {
     id: crypto.randomUUID(),
@@ -102,7 +102,7 @@ const initialPaxList: Passenger[] = [
     email: "john.doe@example.com",
     guests: 2,
     status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 25),
   },
   {
     id: crypto.randomUUID(),
@@ -110,7 +110,7 @@ const initialPaxList: Passenger[] = [
     email: "john.doe@example.com",
     guests: 2,
     status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 26),
   },
   {
     id: crypto.randomUUID(),
@@ -118,7 +118,7 @@ const initialPaxList: Passenger[] = [
     email: "john.doe@example.com",
     guests: 2,
     status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 27),
   },
   {
     id: crypto.randomUUID(),
@@ -126,7 +126,7 @@ const initialPaxList: Passenger[] = [
     email: "john.doe@example.com",
     guests: 2,
     status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 28),
   },
   {
     id: crypto.randomUUID(),
@@ -134,7 +134,7 @@ const initialPaxList: Passenger[] = [
     email: "john.doe@example.com",
     guests: 2,
     status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 29),
   },
   {
     id: crypto.randomUUID(),
@@ -142,7 +142,7 @@ const initialPaxList: Passenger[] = [
     email: "john.doe@example.com",
     guests: 2,
     status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 30),
   },
   {
     id: crypto.randomUUID(),
@@ -150,7 +150,7 @@ const initialPaxList: Passenger[] = [
     email: "john.doe@example.com",
     guests: 2,
     status: "Aguardando",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 31),
   },
   {
     id: crypto.randomUUID(),
@@ -158,7 +158,7 @@ const initialPaxList: Passenger[] = [
     email: "jane.doe@example.com",
     guests: 2,
     status: "Chamado",
-    createdAt: new Date(Date.now() - 1000 * 60 * 20),
+    createdAt: new Date(Date.now() - 1000 * 60 * 32),
   },
   {
     id: crypto.randomUUID(),
@@ -167,7 +167,7 @@ const initialPaxList: Passenger[] = [
     phone: 19994012785,
     guests: 2,
     status: "Não compareceu",
-    createdAt: new Date(Date.now() - 1000 * 60 * 30),
+    createdAt: new Date(Date.now() - 1000 * 60 * 33),
   },
 ];
 
@@ -244,7 +244,7 @@ export default function WaitingRoom() {
           </Link>
         </Button>
       </div>
-      <div className="scrollbar-hide absolute inset-0 flex items-start justify-center gap-4 overflow-y-auto border px-4 pt-24 pb-42 xl:pb-0">
+      <div className="scrollbar-hide absolute inset-0 flex flex-row-reverse items-start justify-center gap-4 overflow-y-auto border px-4 pt-24 pb-42 xl:pb-4">
         {isTablet && isMounted ? (
           <MobilePaxTabs
             calledPaxList={calledPaxList}

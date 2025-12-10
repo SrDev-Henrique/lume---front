@@ -148,7 +148,7 @@ export function CalledPax({
                         Pax entrou
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="w-full max-w-sm sm:w-sm">
+                    <DialogContent className="w-full max-w-sm bg-card/90 backdrop-blur-sm sm:w-sm">
                       <DialogHeader>
                         <DialogTitle className="text-accent-foreground">
                           Confirmar a entrada do pax{" "}

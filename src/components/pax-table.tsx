@@ -50,6 +50,7 @@ import type { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import type { infer as ZodInfer, z } from "zod";
 import { AddPassengerForm } from "@/app/(app)/sala-de-espera/components/add-passenger-form";
+import { DeletePaxDialog } from "@/app/(app)/sala-de-espera/components/delete-pax-dialog";
 import { EditPaxDialog } from "@/app/(app)/sala-de-espera/components/edit-pax-dialog";
 import type { addPassengerSchema } from "@/app/(app)/sala-de-espera/page";
 import { handlePassengerUpdate } from "@/app/(app)/sala-de-espera/utils/handle-update-pax";
@@ -495,10 +496,35 @@ export default function PaxTable({
                   </AlertDialogHeader>
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => {}}>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={() => {
+                      const selectedRows = table.getSelectedRowModel().rows;
+                      if (selectedRows.length === 0) {
+                        return;
+                      }
+                      const selectedIds = new Set(
+                        selectedRows.map((row) => row.original.id),
+                      );
+                      setPaxList((prev) =>
+                        prev.filter((pax) => !selectedIds.has(pax.id)),
+                      );
+                      table.resetRowSelection();
+                      toast.custom((t) => (
+                        <Toast
+                          onClick={() => toast.dismiss(t)}
+                          message={`${
+                            selectedRows.length
+                          } passageir${selectedRows.length === 1 ? "o" : "os"} deletad${
+                            selectedRows.length === 1 ? "o" : "os"
+                          } com sucesso`}
+                        />
+                      ));
+                    }}
+                  >
                     Deletar
                   </AlertDialogAction>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -793,6 +819,10 @@ function RowActions({
 }) {
   const [editingPax, setEditingPax] = useState<Passenger | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  const [deletingPax, setDeletingPax] = useState<Passenger | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   return (
     <div>
       <DropdownMenu>
@@ -833,7 +863,21 @@ function RowActions({
                 </KbdGroup>
               </DropdownMenuShortcut>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                const duplicatedPax: Passenger = {
+                  ..._row.original,
+                  id: crypto.randomUUID(),
+                };
+                setPaxList([...paxList, duplicatedPax]);
+                toast.custom((t) => (
+                  <Toast
+                    onClick={() => toast.dismiss(t)}
+                    message={`Pax ${duplicatedPax.name} duplicado com sucesso`}
+                  />
+                ));
+              }}
+            >
               <span>Duplicar</span>
               <DropdownMenuShortcut>
                 <KbdGroup>
@@ -844,7 +888,13 @@ function RowActions({
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive focus:text-destructive">
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onClick={() => {
+              setDeletingPax(_row.original);
+              setIsDeleting(true);
+            }}
+          >
             <span>Deletar</span>
             <DropdownMenuShortcut>
               <KbdGroup>
@@ -860,6 +910,15 @@ function RowActions({
           editingPax={editingPax}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
+          paxList={paxList}
+          setPaxList={setPaxList}
+        />
+      )}
+      {deletingPax && (
+        <DeletePaxDialog
+          deletingPax={deletingPax}
+          isDeleting={isDeleting}
+          setIsDeleting={setIsDeleting}
           paxList={paxList}
           setPaxList={setPaxList}
         />
