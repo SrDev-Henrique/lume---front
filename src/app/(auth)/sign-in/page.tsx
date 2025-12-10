@@ -34,7 +34,7 @@ import { authClient } from "@/lib/auth";
 
 const signInFormSchema = z.object({
   email: z.email("Digite um email válido"),
-  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
 
 export default function SignInPage({
@@ -78,10 +78,10 @@ export default function SignInPage({
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 sm:px-0">
-      <Card className="w-full max-w-md mx-auto">
+    <div className="flex min-h-screen items-center justify-center px-4 sm:px-0">
+      <Card className="mx-auto w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-center text-2xl font-bold">
+          <CardTitle className="text-center font-bold text-2xl">
             Entrar
           </CardTitle>
           <CardDescription className="text-center">
@@ -93,7 +93,7 @@ export default function SignInPage({
             <SocialButtons />
             <div className="relative w-full">
               <Separator className="absolute inset-0 top-1/2" />
-              <span className="bg-card text-muted-foreground relative mx-auto block w-fit px-2">
+              <span className="relative mx-auto block w-fit bg-card px-2 text-muted-foreground">
                 ou
               </span>
             </div>
@@ -124,7 +124,7 @@ export default function SignInPage({
                   name="password"
                   render={({ field }) => (
                     <FormItem className="relative">
-                      <div className="flex justify-between items-baseline">
+                      <div className="flex items-baseline justify-between">
                         <FormLabel>Senha</FormLabel>
                         <Button
                           type="button"
@@ -171,7 +171,7 @@ export default function SignInPage({
           </div>
         </CardContent>
         <CardFooter>
-          <div className="flex items-center justify-center w-full">
+          <div className="flex w-full items-center justify-center">
             <p>Não tem uma conta?</p>
             <Button variant="link" asChild>
               <Link href="/sign-up" className="underline">

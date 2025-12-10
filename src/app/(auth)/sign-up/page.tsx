@@ -36,10 +36,11 @@ const signUpFormSchema = z
   .object({
     name: z.string(),
     email: z.email("Digite um email válido"),
-    password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+    image: z.url("Digite uma URL válida").optional(),
+    password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
     confirmPassword: z
       .string()
-      .min(8, "A senha deve ter pelo menos 8 caracteres"),
+      .min(6, "A senha deve ter pelo menos 6 caracteres"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -56,6 +57,7 @@ export default function SignUpForm() {
     defaultValues: {
       name: "",
       email: "",
+      image: undefined as string | undefined,
       password: "",
       confirmPassword: "",
     },
@@ -91,10 +93,10 @@ export default function SignUpForm() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 sm:px-0">
-      <Card className="w-full max-w-md mx-auto">
+    <div className="flex min-h-screen items-center justify-center px-4 sm:px-0">
+      <Card className="mx-auto w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-center text-2xl font-bold">
+          <CardTitle className="text-center font-bold text-2xl">
             Criar conta
           </CardTitle>
           <CardDescription className="text-center">
@@ -107,7 +109,7 @@ export default function SignUpForm() {
 
             <div className="relative w-full">
               <Separator className="absolute inset-0 top-1/2" />
-              <span className="bg-card text-muted-foreground relative mx-auto block w-fit px-2">
+              <span className="relative mx-auto block w-fit bg-card px-2 text-muted-foreground">
                 ou
               </span>
             </div>
@@ -139,6 +141,25 @@ export default function SignUpForm() {
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input {...field} type="email" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>URL da foto de perfil</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          type="url"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -219,7 +240,7 @@ export default function SignUpForm() {
           </div>
         </CardContent>
         <CardFooter>
-          <div className="flex items-center justify-center w-full">
+          <div className="flex w-full items-center justify-center">
             <p>Já tem uma conta?</p>
             <Button variant="link" asChild>
               <Link href="/sign-in" className="underline">

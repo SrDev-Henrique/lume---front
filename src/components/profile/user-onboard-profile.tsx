@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, MessageSquare } from "lucide-react";
+import { MessageSquare, Trash2Icon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -22,12 +22,12 @@ export function UserOnboardProfile() {
   const { data: session } = authClient.useSession();
   const router = useRouter();
 
-  const [isSigningOut, startTransition] = useTransition();
+  const [isDeletingUser, startTransition] = useTransition();
   const [hasMounted, setHasMounted] = useState(false);
 
-  function handleSignOut() {
+  function handleDeleteUser() {
     startTransition(async () => {
-      await authClient.signOut();
+      await authClient.deleteUser();
       router.push("/sign-in");
     });
   }
@@ -45,7 +45,7 @@ export function UserOnboardProfile() {
   const showSessionData = hasMounted && Boolean(session);
 
   return (
-    <div className="flex h-fit w-full items-center justify-center">
+    <div className="flex h-fit w-full min-w-[285px] items-center justify-center">
       <Card className="size-full">
         <CardHeader>
           <CardTitle>Bem-vindo</CardTitle>
@@ -87,11 +87,11 @@ export function UserOnboardProfile() {
             </Button>
             <Button
               variant="destructive"
-              onClick={handleSignOut}
-              disabled={isSigningOut}
+              onClick={handleDeleteUser}
+              disabled={isDeletingUser}
             >
-              {isSigningOut ? <Spinner /> : <LogOut className="size-4" />}
-              Sair
+              {isDeletingUser ? <Spinner /> : <Trash2Icon className="size-4" />}
+              Deletar
             </Button>
           </div>
         </CardFooter>
