@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeftIcon } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -12,6 +13,7 @@ import Toast from "@/components/toaster";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIsTablet } from "@/hooks/use-mobile";
+import { enterAnimation } from "./anime";
 import { CalledPax } from "./components/called-pax";
 import { MobilePaxTabs } from "./components/mobile-pax-tabs";
 import { NotArrivedPax } from "./components/not-arrived-pax";
@@ -282,38 +284,52 @@ export default function WaitingRoom() {
           />
         ) : (
           <div className="hidden h-[500px] w-fit min-w-[275px] space-y-4 pb-4 text-primary-foreground xl:block">
-            <Card className="w-full min-w-sm max-w-md gap-2">
-              <CardHeader>
-                <CardTitle>Passageiros chamados</CardTitle>
-              </CardHeader>
-              <CardContent className="scrollbar-hide max-h-[275px] overflow-y-auto">
-                <CalledPax
-                  calledPaxList={calledPaxList}
-                  paxList={paxList}
-                  setPaxList={setPaxList}
-                />
-              </CardContent>
-            </Card>
-            <Card className="w-full min-w-sm max-w-md gap-2">
-              <CardHeader>
-                <CardTitle>Passageiros que não compareceram</CardTitle>
-              </CardHeader>
-              <CardContent className="scrollbar-hide max-h-[275px] overflow-y-auto">
-                <NotArrivedPax
-                  notArrivedPaxList={notArrivedPaxList}
-                  paxList={paxList}
-                  setPaxList={setPaxList}
-                />
-              </CardContent>
-            </Card>
+            <motion.div
+              variants={enterAnimation}
+              initial="initial"
+              animate="animate"
+              className="w-full min-w-sm max-w-md"
+            >
+              <Card className="w-full gap-2">
+                <CardHeader>
+                  <CardTitle>Passageiros chamados</CardTitle>
+                </CardHeader>
+                <CardContent className="scrollbar-hide max-h-[275px] overflow-y-auto">
+                  <CalledPax
+                    calledPaxList={calledPaxList}
+                    paxList={paxList}
+                    setPaxList={setPaxList}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div
+              variants={enterAnimation}
+              initial="initial"
+              animate={enterAnimation.animate(0.2)}
+              className="w-full min-w-sm max-w-md"
+            >
+              <Card className="w-full gap-2">
+                <CardHeader>
+                  <CardTitle>Passageiros que não compareceram</CardTitle>
+                </CardHeader>
+                <CardContent className="scrollbar-hide max-h-[275px] overflow-y-auto">
+                  <NotArrivedPax
+                    notArrivedPaxList={notArrivedPaxList}
+                    paxList={paxList}
+                    setPaxList={setPaxList}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
         )}
-        <div className="h-fit min-w-[375px] flex-1 space-y-4 rounded-3xl border border-border/50 bg-card p-4 text-primary-foreground">
-          {/* <div className="w-full text-center">
-          <h1 className="text-2xl font-semibold text-primary-foreground">
-            Lista de espera
-          </h1>
-        </div> */}
+        <motion.div
+          variants={enterAnimation}
+          initial="initial"
+          animate={enterAnimation.animate(0.4)}
+          className="h-fit min-w-[375px] flex-1 space-y-4 rounded-3xl border border-border/50 bg-card p-4 text-primary-foreground"
+        >
           <PaxTable
             data={filteredData}
             form={form}
@@ -321,7 +337,7 @@ export default function WaitingRoom() {
             paxList={paxList}
             setPaxList={setPaxList}
           />
-        </div>
+        </motion.div>
       </div>
     </div>
   );
