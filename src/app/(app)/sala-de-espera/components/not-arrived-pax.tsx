@@ -24,6 +24,7 @@ export function NotArrivedPax({
   setPaxList: Dispatch<SetStateAction<Passenger[]>>;
 }) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deletingPax, setDeletingPax] = useState<Passenger | null>(null);
   return (
     <>
       {notArrivedPaxList.length > 0 ? (
@@ -70,15 +71,17 @@ export function NotArrivedPax({
               <Button
                 className="size-7"
                 variant="destructive"
-                onClick={() => setIsDeleting(true)}
+                onClick={() => {
+                  setIsDeleting(true);
+                  setDeletingPax(passenger);
+                }}
               >
                 <TrashIcon aria-hidden="true" className="size-3" />
               </Button>
               <DeletePaxDialog
-                deletingPax={passenger}
+                deletingPax={deletingPax}
                 isDeleting={isDeleting}
                 setIsDeleting={setIsDeleting}
-                paxList={notArrivedPaxList}
                 setPaxList={setPaxList}
               />
             </div>

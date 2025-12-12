@@ -922,7 +922,6 @@ function RowActions({
           deletingPax={deletingPax}
           isDeleting={isDeleting}
           setIsDeleting={setIsDeleting}
-          paxList={paxList}
           setPaxList={setPaxList}
         />
       )}

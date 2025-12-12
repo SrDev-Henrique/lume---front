@@ -1,4 +1,5 @@
 import { UserXIcon } from "lucide-react";
+import type { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import Toast from "@/components/toaster";
 import { Button } from "@/components/ui/button";
@@ -17,14 +18,12 @@ export function DeletePaxDialog({
   deletingPax,
   isDeleting,
   setIsDeleting,
-  paxList,
   setPaxList,
 }: {
-  deletingPax: Passenger;
+  deletingPax: Passenger | null;
   isDeleting: boolean;
   setIsDeleting: (isDeleting: boolean) => void;
-  paxList: Passenger[];
-  setPaxList: (paxList: Passenger[]) => void;
+  setPaxList: Dispatch<SetStateAction<Passenger[]>>;
 }) {
   return (
     <Dialog open={isDeleting} onOpenChange={setIsDeleting}>
@@ -32,10 +31,10 @@ export function DeletePaxDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-center gap-2 font-medium text-lg text-primary-foreground">
             <UserXIcon className="size-5" />
-            Deletar passageiro ({deletingPax.name})
+            Deletar passageiro ({deletingPax?.name})
           </DialogTitle>
           <DialogDescription className="text-center text-muted-foreground">
-            Tem certeza que deseja deletar o passageiro {deletingPax.name}?
+            Tem certeza que deseja deletar o passageiro {deletingPax?.name}?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex flex-col sm:flex-row">
@@ -43,12 +42,14 @@ export function DeletePaxDialog({
             variant="destructive"
             className="w-full sm:flex-1"
             onClick={() => {
-              setPaxList(paxList.filter((pax) => pax.id !== deletingPax.id));
+              setPaxList((prev) =>
+                prev.filter((pax) => pax.id !== deletingPax?.id),
+              );
               setIsDeleting?.(false);
               toast.custom((t) => (
                 <Toast
                   onClick={() => toast.dismiss(t)}
-                  message={`Pax ${deletingPax.name} deletado com sucesso`}
+                  message={`Pax ${deletingPax?.name} deletado com sucesso`}
                 />
               ));
             }}
